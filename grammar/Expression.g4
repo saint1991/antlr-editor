@@ -74,7 +74,7 @@ FUNCTION_NAME
 
 // Identifiers for column references (can contain non-ASCII, no whitespace)
 IDENTIFIER
-    : ~[\[\]\s]+
+    : ~[\u005B\u005D \t\r\n]+
     ;
 
 // Skip whitespace
