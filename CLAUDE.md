@@ -21,7 +21,7 @@ Build specific stages of the Docker image:
 
 ```bash
 # Build ANTLR generator stage (generates Go parser from grammar)
-docker build --target antlr-generator -t antlr-editor:antlr-generator -f parser/wasm/go/Dockerfile .
+docker build --target antlr-generator -t antlr-editor:antlr-generator -f parser/Dockerfile .
 
 ## Architecture
 
