@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"antlr-editor/parser/src/gen/parser"
+	"antlr-editor/parser/gen/parser"
 	"github.com/antlr4-go/antlr/v4"
 )
 
