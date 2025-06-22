@@ -1,6 +1,8 @@
 # ANTLR code generation stage
 ARG AMAZON_CORRETTO_TAG=24-alpine3.21
+ARG BUSYBOX_TAG=1.37
 ARG GOLANG_TAG=1.24-bookworm
+
 
 FROM amazoncorretto:${AMAZON_CORRETTO_TAG} AS antlr-generator
 
@@ -19,3 +21,8 @@ COPY grammar/Expression.g4 ./grammar/Expression.g4
 
 # Generate Go parser from grammar (visitor pattern only)
 RUN java -jar /opt/antlr4.jar -Dlanguage=Go -o parser -package parser -visitor -no-listener grammar/Expression.g4
+
+
+FROM scratch AS antlr-generated
+
+COPY --from=antlr-generator /antlr/parser/grammar/* /
