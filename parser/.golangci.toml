@@ -1,0 +1,22 @@
+version = "2"
+
+[linters]
+enable = ["misspell"]
+
+[linters.exclusions]
+generated = "strict"
+presets = [
+  "comments",
+  "common-false-positives",
+  "legacy",
+  "std-error-handling"
+]
+
+[formatters]
+enable = ["gofmt", "goimports"]
+
+[formatters.settings.goimports]
+local-prefixes = ["antlr-editor/parser"]
+
+[formatters.exclusions]
+generated = "strict"

@@ -1,0 +1,12 @@
+repos:
+  - repo: local
+    hooks:
+      - id: golangci-lint
+        name: golangci-lint
+        description : Run golangci-lint on Go files
+        entry: bash -c "cd parser && golangci-lint run --config=.golangci.toml --new-from-rev HEAD --fix"
+        types: [go]
+        language: golang
+        require_serial: true
+        pass_filenames: false
+        verbose: true
