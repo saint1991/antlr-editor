@@ -5,7 +5,9 @@ expression
     : literal                                          # LiteralExpr
     | columnReference                                  # ColumnRefExpr
     | functionCall                                     # FunctionCallExpr
+    | IDENTIFIER                                       # IdentifierExpr
     | LPAREN expression RPAREN                         # ParenExpr
+    | SUB expression                                   # UnaryMinusExpr
     | <assoc=right> expression POW expression          # PowerExpr
     | expression (MUL | DIV) expression                # MulDivExpr
     | expression (ADD | SUB) expression                # AddSubExpr
@@ -18,6 +20,7 @@ literal
     : STRING_LITERAL
     | INTEGER_LITERAL
     | FLOAT_LITERAL
+    | BOOLEAN_LITERAL
     ;
 
 columnReference
@@ -67,14 +70,19 @@ FLOAT_LITERAL
     | [0-9]+ ('.' [0-9]+)? [eE] [+-]? [0-9]+
     ;
 
+BOOLEAN_LITERAL
+    : 'true'
+    | 'false'
+    ;
+
 // Function names (uppercase only)
 FUNCTION_NAME
     : [A-Z]+
     ;
 
-// Identifiers for column references (can contain non-ASCII, no whitespace)
+// Identifiers for column references (letters, digits, underscore)
 IDENTIFIER
-    : ~[\u005B\u005D \t\r\n]+
+    : [a-zA-Z_][a-zA-Z0-9_]*
     ;
 
 // Skip whitespace

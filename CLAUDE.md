@@ -2,29 +2,34 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Rule
+## Rules
 
-- MUST NOT edit .gitignore
-- MUST NOT edit content of .git directory.
+- DO NOT edit .gitignore
+- DO NOT edit the contents of the .git directory
 
 ## Project Overview
 
-See [README.md](./README.md)
+Please refer to [README.md](./README.md) for detailed information.
 
 ## Development Commands
 
-### Parser WASM Build Commands
+### Parser Build Commands
 
-**Note: All Docker commands must be executed from the project root directory.**
-
-Build specific stages of the Docker image:
+To generate the Go ANTLR parser from grammar/Expression.g4, run the following command from the project root:
 
 ```bash
-# Build ANTLR generator stage (generates Go parser from grammar)
-docker build --target antlr-generator -t antlr-editor:antlr-generator -f parser/Dockerfile .
-
-# Generate parser code
+# Generate ANTLR parser from Expression.g4
 docker build --target antlr-generated --output=type=local,dest=parser/gen/parser -f parser/Dockerfile .
+```
+
+For additional parser build commands, please see [parser/CLAUDE.md](./parser/CLAUDE.md).
+
+## Project Structure
+
+```
+├── grammar/   # Grammar definitions in ANTLR4 format
+├── parser/    # ANTLR4 parser implementation in Go
+└── README.md
 ```
 
 ## Architecture
