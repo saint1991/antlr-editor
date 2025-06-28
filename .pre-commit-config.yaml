@@ -10,3 +10,21 @@ repos:
         require_serial: true
         pass_filenames: false
         verbose: true
+      - id: go-test
+        name: go-test
+        description: Run go test on Go files
+        entry: bash -c "cd parser && go test -v ./..."
+        types: [go]
+        language: golang
+        require_serial: true
+        pass_filenames: false
+        verbose: true
+      - id: go-vet
+        name: go-vet
+        description: Run go vet on Go files
+        entry: bash -c "cd parser && go vet ./core/... ./ffi/... ./wasm/..."
+        types: [go]
+        language: golang
+        require_serial: true
+        pass_filenames: false
+        verbose: true
