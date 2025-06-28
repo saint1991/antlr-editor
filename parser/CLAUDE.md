@@ -27,7 +27,11 @@ This is the Go-based ANTLR4 parser module for the antlr-editor project. It provi
 
 ### Testing
 
-To be implemented.
+```bash
+cd parser
+go vet ./core/... ./ffi/... ./wasm/... 
+go test ./...
+```
 
 ### Linting and Type Checking
 
