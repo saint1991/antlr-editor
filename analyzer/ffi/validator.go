@@ -8,12 +8,11 @@ import (
 	"encoding/json"
 	"unsafe"
 
-	"antlr-editor/parser/core"
+	core "antlr-editor/parser/core/app"
 	"antlr-editor/parser/core/models"
 )
 
 // Global instances for FFI usage
-var validator = core.NewValidator()
 var analyzer = core.NewAnalyzer()
 
 // ValidateFFI is an FFI-compatible wrapper for the Validate function
@@ -28,7 +27,7 @@ func ValidateFFI(expression *C.char, length C.int) C.int {
 	// Convert C string to Go string
 	expressionStr := C.GoStringN(expression, length)
 
-	if validator.Validate(expressionStr) {
+	if analyzer.Validate(expressionStr) {
 		return 1
 	}
 	return 0
@@ -45,7 +44,7 @@ func ValidateFFIString(expression *C.char) C.int {
 	// Convert C string to Go string
 	expressionStr := C.GoString(expression)
 
-	if validator.Validate(expressionStr) {
+	if analyzer.Validate(expressionStr) {
 		return 1
 	}
 	return 0
@@ -69,7 +68,7 @@ func AnalyzeFFI(expression *C.char) *C.char {
 	jsonBytes, err := json.Marshal(result)
 	if err != nil {
 		// Return error result in JSON format
-		errorResult := core.AnalysisResult{
+		errorResult := &core.AnalysisResult{
 			Tokens: []models.TokenInfo{},
 			Errors: []models.ErrorInfo{
 				{

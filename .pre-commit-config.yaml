@@ -4,7 +4,7 @@ repos:
       - id: golangci-lint
         name: golangci-lint
         description : Run golangci-lint on Go files
-        entry: bash -c "cd parser && golangci-lint run --config=.golangci.toml --new-from-rev HEAD --fix"
+        entry: bash -c "cd analyzer && golangci-lint run --config=.golangci.toml --new-from-rev HEAD --fix"
         types: [go]
         language: golang
         require_serial: true
@@ -13,7 +13,7 @@ repos:
       - id: go-test
         name: go-test
         description: Run go test on Go files
-        entry: bash -c "cd parser && go test -v ./..."
+        entry: bash -c "cd analyzer && go test -v ./..."
         types: [go]
         language: golang
         require_serial: true
@@ -22,7 +22,7 @@ repos:
       - id: go-vet
         name: go-vet
         description: Run go vet on Go files
-        entry: bash -c "cd parser && go vet ./core/... ./ffi/... ./wasm/..."
+        entry: bash -c "cd analyzer && go vet ./core/... ./ffi/... ./wasm/..."
         types: [go]
         language: golang
         require_serial: true

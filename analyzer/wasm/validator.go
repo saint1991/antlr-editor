@@ -3,12 +3,11 @@ package main
 import (
 	"encoding/json"
 
-	"antlr-editor/parser/core"
+	core "antlr-editor/parser/core/app"
 	"antlr-editor/parser/core/models"
 )
 
 // Global instances for WASM usage
-var validator = core.NewValidator()
 var analyzer = core.NewAnalyzer()
 
 // ValidateWASM is a WASM-compatible wrapper for the Validate function
@@ -16,7 +15,7 @@ var analyzer = core.NewAnalyzer()
 //
 //go:export validate
 func ValidateWASM(expression string) int {
-	if validator.Validate(expression) {
+	if analyzer.Validate(expression) {
 		return 1
 	}
 	return 0
@@ -32,7 +31,7 @@ func AnalyzeWASM(expression string) string {
 	jsonBytes, err := json.Marshal(result)
 	if err != nil {
 		// Return error result in JSON format
-		errorResult := core.AnalysisResult{
+		errorResult := &core.AnalysisResult{
 			Tokens: []models.TokenInfo{},
 			Errors: []models.ErrorInfo{
 				{
