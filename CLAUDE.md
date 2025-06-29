@@ -15,22 +15,22 @@ Please refer to [README.md](./README.md) for detailed information.
 
 ## Development Commands
 
-### Parser Build Commands
+### Analyzer Build Commands
 
 To generate the Go ANTLR parser from grammar/Expression.g4, run the following command from the project root:
 
 ```bash
 # Generate ANTLR parser from Expression.g4
-docker build --target antlr-generated --output=type=local,dest=parser/gen/parser -f parser/Dockerfile .
+docker build --target antlr-generated --output=type=local,dest=analyzer/gen/parser -f analyzer/Dockerfile .
 ```
 
-For additional parser build commands, please see [parser/CLAUDE.md](./parser/CLAUDE.md).
+For additional analyzer build commands, please see [analyzer/CLAUDE.md](./analyzer/CLAUDE.md).
 
 ## Project Structure
 
 ```
 ├── grammar/   # Grammar definitions in ANTLR4 format
-├── parser/    # ANTLR4 parser implementation in Go
+├── analyzer/    # ANTLR4 analyzer implementation in Go
 └── README.md
 ```
 

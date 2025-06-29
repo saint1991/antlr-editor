@@ -1,6 +1,6 @@
-# Parser Module
+# Analyzer Module
 
-ANTLR4-based expression parser for the antlr-editor project, implemented in Go with support for multiple target platforms.
+ANTLR4-based expression analyzer for the antlr-editor project, implemented in Go with support for multiple target platforms.
 
 ## Overview
 
@@ -9,7 +9,7 @@ This module provides parsing capabilities for mathematical and logical expressio
 ## Project Structure
 
 ```
-parser/
+analyzer/
 ├── go.mod              # Go module definition
 ├── go.sum              # Dependency checksums
 ├── examples/
@@ -34,13 +34,13 @@ From the project root directory:
 
 ```bash
 # Generate ANTLR parser code
-docker build --target antlr-generated --output=type=local,dest=parser/gen/parser -f parser/Dockerfile .
+docker build --target antlr-generated --output=type=local,dest=analyzer/gen/parser -f analyzer/Dockerfile .
 ```
 
 ### 2. Run Examples
 
 ```bash
-cd parser
+cd analyzer
 go run ./examples
 ```
 
