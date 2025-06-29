@@ -54,13 +54,17 @@ parser/
 ├── codegen.sh          # Script to generate ANTLR parser code
 ├── Dockerfile          # Docker configuration for ANTLR code generation
 ├── .golangci.toml      # Linting configuration
-├── core/               # Core parser validation logic
-│   ├── validator.go    # Main validator implementation
-│   └── validator_test.go # Validator tests
-├── wasm/               # WebAssembly target (planned)
-│   └── validator.go    # WASM-specific validator stub
-├── ffi/                # Python FFI target (planned)
-│   └── validator.go    # FFI-specific validator stub
+├── core/               # Core parser logic
+│   ├── analyzer.go     # Expression analyzer for syntax highlighting
+│   ├── analyzer_test.go # Analyzer tests
+│   ├── validator.go    # Expression validator implementation
+│   ├── validator_test.go # Validator tests
+│   └── models/         # Shared data structures
+│       └── analysis.go # TokenInfo, ErrorInfo, AnalysisResult types
+├── wasm/               # WebAssembly target
+│   └── validator.go    # WASM-compatible validator and analyzer
+├── ffi/                # Python FFI target
+│   └── validator.go    # FFI-compatible validator and analyzer
 └── gen/                # Generated ANTLR parser code (git-ignored)
     └── parser/         # Auto-generated parser implementation
 ```
