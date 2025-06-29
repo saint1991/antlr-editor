@@ -6,6 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - DO NOT edit .gitignore
 - DO NOT edit the contents of the .git directory
+- DO NOT edit generated files
 
 ## Project Overview
 

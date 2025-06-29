@@ -50,6 +50,11 @@ func (v *Validator) Validate(expression string) bool {
 		return false
 	}
 
+	// Check if all tokens were consumed
+	if p.GetCurrentToken().GetTokenType() != antlr.TokenEOF {
+		return false
+	}
+
 	// Create validation visitor to check semantic validity
 	visitor := &validationVisitor{
 		BaseExpressionVisitor: &parser.BaseExpressionVisitor{},
@@ -239,14 +244,6 @@ func (v *validationVisitor) VisitArgumentList(ctx *parser.ArgumentListContext) a
 		}
 	}
 	return true
-}
-
-func (v *validationVisitor) VisitIdentifierExpr(ctx *parser.IdentifierExprContext) any {
-	// Identifier expressions are valid if they have a non-empty identifier
-	if ctx.IDENTIFIER() != nil && ctx.IDENTIFIER().GetText() != "" {
-		return true
-	}
-	return false
 }
 
 func (v *validationVisitor) VisitUnaryMinusExpr(ctx *parser.UnaryMinusExprContext) any {

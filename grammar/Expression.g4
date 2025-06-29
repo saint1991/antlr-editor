@@ -5,13 +5,12 @@ expression
     : literal                                          # LiteralExpr
     | columnReference                                  # ColumnRefExpr
     | functionCall                                     # FunctionCallExpr
-    | IDENTIFIER                                       # IdentifierExpr
     | LPAREN expression RPAREN                         # ParenExpr
     | SUB expression                                   # UnaryMinusExpr
     | <assoc=right> expression POW expression          # PowerExpr
     | expression (MUL | DIV) expression                # MulDivExpr
     | expression (ADD | SUB) expression                # AddSubExpr
-    | expression (EQ | NEQ) expression                 # ComparisonExpr
+    | expression (LT | LE | GT | GE | EQ | NEQ) expression  # ComparisonExpr
     | expression AND expression                        # AndExpr
     | expression OR expression                         # OrExpr
     ;
@@ -43,6 +42,10 @@ SUB : '-' ;
 MUL : '*' ;
 DIV : '/' ;
 POW : '^' ;
+LT  : '<' ;
+LE  : '<=' ;
+GT  : '>' ;
+GE  : '>=' ;
 EQ  : '==' ;
 NEQ : '!=' ;
 OR  : '||' ;
@@ -55,14 +58,10 @@ LBRACKET : '[' ;
 RBRACKET : ']' ;
 COMMA    : ',' ;
 
-// Literals
-STRING_LITERAL
-    : '\'' ( ~['\r\n\\] | '\\' . )* '\''
-    | '"'  ( ~["\r\n\\] | '\\' . )* '"'
-    ;
-
-INTEGER_LITERAL
-    : [0-9]+
+// Literals - Order matters for proper tokenization
+BOOLEAN_LITERAL
+    : 'true'
+    | 'false'
     ;
 
 FLOAT_LITERAL
@@ -70,12 +69,16 @@ FLOAT_LITERAL
     | [0-9]+ ('.' [0-9]+)? [eE] [+-]? [0-9]+
     ;
 
-BOOLEAN_LITERAL
-    : 'true'
-    | 'false'
+INTEGER_LITERAL
+    : [0-9]+
     ;
 
-// Function names (uppercase only)
+STRING_LITERAL
+    : '\'' ( ~['\r\n\\] | '\\' . )* '\''
+    | '"'  ( ~["\r\n\\] | '\\' . )* '"'
+    ;
+
+// Function names (uppercase only) - must come before IDENTIFIER
 FUNCTION_NAME
     : [A-Z]+
     ;
