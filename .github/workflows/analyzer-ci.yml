@@ -1,0 +1,68 @@
+name: Analyzer CI
+
+on:
+  push:
+    branches: [ 'main' ]
+    paths:
+      - 'analyzer/**'
+      - 'grammar/**'
+      - '.github/workflows/analyzer-ci.yml'
+  pull_request:
+    branches: [ '*', '!hotfix/**' ]
+    paths:
+      - 'analyzer/**'
+      - 'grammar/**'
+      - '.github/workflows/analyzer-ci.yml'
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: analyzer
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24.4'
+    
+    - name: Cache Go modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+    
+    - name: Install dependencies
+      run: go mod download
+    
+    - name: Generate ANTLR parser
+      run: |
+        cd ..
+        docker build --target antlr-generated --output=type=local,dest=analyzer/gen/parser -f analyzer/Dockerfile .
+    
+    - name: Install golangci-lint
+      uses: golangci/golangci-lint-action@v8
+      with:
+        version: latest
+        working-directory: analyzer
+        skip-cache: true
+    
+    - name: Run go vet
+      run: go vet ./core/... ./ffi/... ./wasm/...
+    
+    - name: Run golangci-lint
+      run: golangci-lint run
+    
+    - name: Run tests
+      run: go test ./... -v
+    
+    - name: Build all packages
+      run: go build ./...
