@@ -8,3 +8,13 @@ type ErrorInfo struct {
 	Start   int    `json:"start"`   // Error start position
 	End     int    `json:"end"`     // Error end position
 }
+
+func (e *ErrorInfo) AsMap() map[string]any {
+	return map[string]any{
+		"message": e.Message,
+		"line":    e.Line,
+		"column":  e.Column,
+		"start":   e.Start,
+		"end":     e.End,
+	}
+}

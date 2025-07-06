@@ -84,12 +84,45 @@ go run ./examples "MAX(1, 2, 3)"
 go run ./examples "[column_a] > 5"
 ```
 
-## Planned Features
+## WebAssembly (WASM) Support
 
-### WebAssembly Target (`wasm/`)
-- Compile parser to WASM for browser usage
-- JavaScript bindings for web applications
-- Optimized for size and performance
+The analyzer can be compiled to WebAssembly for browser usage:
+
+### Building WASM Module
+
+```bash
+# Using Make (requires local Go installation)
+cd analyzer
+make wasm
+
+# Using Docker (for optimized build with wasm-opt)
+make wasm-opt
+
+# Or directly with Docker from project root
+docker build --target wasm-output --output=type=local,dest=analyzer/wasm-dist -f analyzer/Dockerfile .
+```
+
+### Using WASM in Browser
+
+The WASM module exposes two functions:
+- `validate(expression)` - Returns true/false for expression validity
+- `analyze(expression)` - Returns JSON with token and error information
+
+Example usage:
+```javascript
+const go = new Go();
+WebAssembly.instantiateStreaming(fetch("validator.wasm"), go.importObject).then((result) => {
+    go.run(result.instance);
+    
+    // Validate expression
+    const isValid = validate("2 + 3");
+    
+    // Analyze expression for syntax highlighting
+    const analysis = JSON.parse(analyze("2 + 3"));
+});
+```
+
+## Python FFI Support
 
 ### Python FFI Target (`ffi/`)
 - CGO-based shared library for Python integration

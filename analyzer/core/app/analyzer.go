@@ -1,4 +1,4 @@
-package core
+package app
 
 import (
 	"github.com/antlr4-go/antlr/v4"
@@ -19,13 +19,29 @@ func (r *AnalysisResult) IsValid() bool {
 	return len(r.Errors) == 0
 }
 
+func (r *AnalysisResult) AsMap() map[string]any {
+	tokens := make([]map[string]any, len(r.Tokens))
+	for i, token := range r.Tokens {
+		tokens[i] = token.AsMap()
+	}
+
+	errors := make([]map[string]any, len(r.Errors))
+	for i, err := range r.Errors {
+		errors[i] = err.AsMap()
+	}
+	return map[string]any{
+		"tokens": tokens,
+		"errors": errors,
+	}
+}
+
 // Analyzer provides expression syntax analysis functionality
 type Analyzer struct {
 	helper *infrastructure.ParserHelper
 }
 
-// NewAnalyzer creates a new analyzer instance
-func NewAnalyzer() *Analyzer {
+// newAnalyzer creates a new analyzer instance
+func newAnalyzer() *Analyzer {
 	return &Analyzer{
 		helper: infrastructure.NewParserHelper(),
 	}

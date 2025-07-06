@@ -2,7 +2,7 @@ name: Analyzer CI
 
 on:
   push:
-    branches: [ 'main' ]
+    branches: [ main ]
     paths:
       - 'analyzer/**'
       - 'grammar/**'
@@ -43,17 +43,17 @@ jobs:
     - name: Install dependencies
       run: go mod download
     
-    - name: Generate ANTLR parser
-      run: |
-        cd ..
-        docker build --target antlr-generated --output=type=local,dest=analyzer/gen/parser -f analyzer/Dockerfile .
-    
     - name: Install golangci-lint
       uses: golangci/golangci-lint-action@v8
       with:
         version: latest
         working-directory: analyzer
         skip-cache: true
+    
+    - name: Generate ANTLR parser
+      run: |
+        cd ..
+        ./codegen.sh
     
     - name: Run go vet
       run: go vet ./core/... ./ffi/... ./wasm/...
@@ -66,3 +66,12 @@ jobs:
     
     - name: Build all packages
       run: go build ./...
+ 
+    - name: Build WASM
+      run: |
+        cd wasm
+        GOOS=js GOARCH=wasm go build ./wasm/analyzer.go
+      
+    - name: Build optimized WASM with Docker
+      run: |
+        docker build --target wasm-output --output=type=local,dest=analyzer/wasm-dist -f analyzer/Dockerfile .

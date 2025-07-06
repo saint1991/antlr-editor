@@ -40,3 +40,15 @@ type TokenInfo struct {
 	Column  int       `json:"column"`  // Column number (0-based)
 	IsValid bool      `json:"isValid"` // Whether this token is in error state
 }
+
+func (t *TokenInfo) AsMap() map[string]any {
+	return map[string]any{
+		"type":    t.Type,
+		"text":    t.Text,
+		"start":   t.Start,
+		"end":     t.End,
+		"line":    t.Line,
+		"column":  t.Column,
+		"isValid": t.IsValid,
+	}
+}
