@@ -26,3 +26,37 @@ RUN java -jar /opt/antlr4.jar -Dlanguage=Go -o parser -package parser -visitor -
 FROM scratch AS antlr-generated
 
 COPY --from=antlr-generator /antlr/parser/grammar/* /
+
+
+# WASM build stage
+FROM golang:${GOLANG_TAG} AS wasm-builder
+
+# Install WASM build dependencies
+RUN apt-get update && apt-get install -y \
+    binaryen \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir /go/dist
+
+WORKDIR /go/src
+
+# Copy go module files
+COPY analyzer/go.mod analyzer/go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy source code
+COPY analyzer/ ./
+COPY --from=antlr-generator /antlr/parser/grammar/* ./gen/parser/
+
+# Build WASM module
+RUN GOOS=js GOARCH=wasm go build -o analyzer.wasm ./wasm/analyzer.go
+
+# Optimize WASM binary
+RUN wasm-opt -O3 -o /go/dist/analyzer.wasm analyzer.wasm
+
+
+# Export WASM artifact
+FROM scratch AS wasm-output
+
+COPY --from=wasm-builder /go/dist/analyzer.wasm /analyzer.wasm

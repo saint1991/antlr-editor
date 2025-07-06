@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 
-	core "antlr-editor/parser/core/app"
+	"antlr-editor/parser/core/app"
 )
 
 func main() {
 	fmt.Println("ANTLR Editor Parser - Expression Validator")
 
 	// Example usage
-	analyzer := core.NewAnalyzer()
+	application := app.NewApp()
 
 	examples := []string{
 		"1 + 2",
@@ -21,7 +21,7 @@ func main() {
 	}
 
 	for _, expr := range examples {
-		isValid := analyzer.Validate(expr)
+		isValid := application.Validate(expr)
 		status := "✓"
 		if !isValid {
 			status = "✗"

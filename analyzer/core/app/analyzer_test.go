@@ -1,4 +1,4 @@
-package core
+package app
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 )
 
 func TestAnalyzer_Validate(t *testing.T) {
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 
 	tests := []struct {
 		name       string
@@ -166,7 +166,7 @@ func TestAnalyzer_Validate(t *testing.T) {
 }
 
 func TestAnalyzer_SimpleExpression(t *testing.T) {
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 	result := analyzer.Analyze("SUM([price] * [quantity]) > 1000")
 
 	if len(result.Errors) != 0 {
@@ -215,7 +215,7 @@ func TestAnalyzer_SimpleExpression(t *testing.T) {
 }
 
 func TestAnalyzer_ComplexExpression(t *testing.T) {
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 	result := analyzer.Analyze("SUM([price] * [quantity]) > 1000 && [status] == 'active'")
 
 	if len(result.Errors) != 0 {
@@ -250,7 +250,7 @@ func TestAnalyzer_LiteralTypes(t *testing.T) {
 		{`"world"`, models.TokenString, `"world"`},
 	}
 
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 
 	for _, tc := range testCases {
 		t.Run(tc.expression, func(t *testing.T) {
@@ -276,7 +276,7 @@ func TestAnalyzer_LiteralTypes(t *testing.T) {
 }
 
 func TestAnalyzer_ErrorDetection(t *testing.T) {
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 	result := analyzer.Analyze("SUM([price] * ") // Incomplete expression
 
 	if len(result.Errors) == 0 {
@@ -294,7 +294,7 @@ func TestAnalyzer_ErrorDetection(t *testing.T) {
 }
 
 func TestAnalyzer_EmptyExpression(t *testing.T) {
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 	result := analyzer.Analyze("")
 
 	// Empty expression should be invalid
@@ -308,7 +308,7 @@ func TestAnalyzer_EmptyExpression(t *testing.T) {
 }
 
 func TestAnalyzer_WhitespaceHandling(t *testing.T) {
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 	result := analyzer.Analyze("SUM( [price] )")
 
 	if len(result.Errors) != 0 {
@@ -330,7 +330,7 @@ func TestAnalyzer_WhitespaceHandling(t *testing.T) {
 }
 
 func TestAnalyzer_PositionAccuracy(t *testing.T) {
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 	expression := "SUM([price])"
 	result := analyzer.Analyze(expression)
 
@@ -359,7 +359,7 @@ func TestAnalyzer_PositionAccuracy(t *testing.T) {
 }
 
 func TestAnalyzer_MultilineExpression(t *testing.T) {
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 	expression := "SUM([price])\n> 1000"
 	result := analyzer.Analyze(expression)
 
@@ -382,7 +382,7 @@ func TestAnalyzer_MultilineExpression(t *testing.T) {
 }
 
 func TestAnalyzer_JSONSerialization(t *testing.T) {
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 	result := analyzer.Analyze("SUM([price]) > 1000")
 
 	// Test that the result can be serialized to JSON
@@ -410,7 +410,7 @@ func TestAnalyzer_JSONSerialization(t *testing.T) {
 
 func TestAnalyzer_OperatorTypes(t *testing.T) {
 	operators := []string{"+", "-", "*", "/", "^", "<", "<=", ">", ">=", "==", "!=", "&&", "||"}
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 
 	for _, op := range operators {
 		t.Run(op, func(t *testing.T) {
@@ -434,7 +434,7 @@ func TestAnalyzer_OperatorTypes(t *testing.T) {
 
 func TestAnalyzer_DelimiterTypes(t *testing.T) {
 	delimiters := []string{"(", ")", "[", "]", ","}
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 
 	expression := "SUM([price], [quantity])"
 	result := analyzer.Analyze(expression)
@@ -474,7 +474,7 @@ func TestAnalyzer_DelimiterTypes(t *testing.T) {
 }
 
 func TestAnalyzer_ErrorRecovery(t *testing.T) {
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 
 	testCases := []struct {
 		name         string
@@ -506,7 +506,7 @@ func TestAnalyzer_ErrorRecovery(t *testing.T) {
 }
 
 func TestAnalyzer_ErrorPosition(t *testing.T) {
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 	result := analyzer.Analyze("1 ++ 2") // Invalid double plus
 
 	if len(result.Errors) == 0 {
@@ -528,7 +528,7 @@ func TestAnalyzer_ErrorPosition(t *testing.T) {
 
 // Benchmark test for performance
 func BenchmarkAnalyzer_SimpleExpression(b *testing.B) {
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 	expression := "SUM([price] * [quantity]) > 1000 && [status] == 'active'"
 
 	b.ResetTimer()
@@ -538,7 +538,7 @@ func BenchmarkAnalyzer_SimpleExpression(b *testing.B) {
 }
 
 func BenchmarkAnalyzer_ComplexExpression(b *testing.B) {
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 	expression := "((SUM([revenue]) - SUM([cost])) / SUM([revenue])) * 100 > 15.5 && [region] == 'North' || ([year] >= 2020 && [month] IN ('Jan', 'Feb', 'Mar'))"
 
 	b.ResetTimer()
@@ -549,7 +549,7 @@ func BenchmarkAnalyzer_ComplexExpression(b *testing.B) {
 
 // Test the integrated validation functionality
 func TestAnalyzer_ValidationIntegration(t *testing.T) {
-	analyzer := NewAnalyzer()
+	analyzer := newAnalyzer()
 
 	tests := []struct {
 		name       string

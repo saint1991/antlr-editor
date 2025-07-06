@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"unsafe"
 
-	core "antlr-editor/parser/core/app"
+	"antlr-editor/parser/core/app"
 	"antlr-editor/parser/core/models"
 )
 
 // Global instances for FFI usage
-var analyzer = core.NewAnalyzer()
+var analyzer = app.NewApp()
 
 // ValidateFFI is an FFI-compatible wrapper for the Validate function
 // This can be called from Python using ctypes or other FFI systems
@@ -68,7 +68,7 @@ func AnalyzeFFI(expression *C.char) *C.char {
 	jsonBytes, err := json.Marshal(result)
 	if err != nil {
 		// Return error result in JSON format
-		errorResult := &core.AnalysisResult{
+		errorResult := &app.AnalysisResult{
 			Tokens: []models.TokenInfo{},
 			Errors: []models.ErrorInfo{
 				{

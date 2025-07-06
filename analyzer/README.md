@@ -84,12 +84,12 @@ go run ./examples "MAX(1, 2, 3)"
 go run ./examples "[column_a] > 5"
 ```
 
-## Planned Features
+## WebAssembly (WASM) Support
 
-### WebAssembly Target (`wasm/`)
-- Compile parser to WASM for browser usage
-- JavaScript bindings for web applications
-- Optimized for size and performance
+The analyzer can be compiled to WebAssembly for browser usage:
+
+
+## Python FFI Support
 
 ### Python FFI Target (`ffi/`)
 - CGO-based shared library for Python integration
