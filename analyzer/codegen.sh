@@ -45,7 +45,7 @@ mkdir -p "$SCRIPT_DIR/gen/parser"
 
 # Run the Docker build command from the project root
 cd "$PROJECT_ROOT"
-if docker build --target antlr-generated --output=type=local,dest=parser/gen/parser -f parser/Dockerfile .; then
+if docker build --target antlr-generated --output=type=local,dest=analyzer/gen/parser -f analyzer/Dockerfile .; then
     echo -e "${GREEN}✓ ANTLR parser code generated successfully!${NC}"
     echo ""
     echo "Generated files:"
