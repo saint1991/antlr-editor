@@ -27,9 +27,9 @@ func validate(this js.Value, args []js.Value) any {
 func analyze(this js.Value, args []js.Value) any {
 	if len(args) != 1 {
 		return js.ValueOf(map[string]any{
-			"tokens": []map[string]any{},
-			"errors": []map[string]any{
-				{
+			"tokens": []any{},
+			"errors": []any {
+				map[string]any {
 					"message": "Invalid arguments",
 					"line":    -1,
 					"column":  -1,

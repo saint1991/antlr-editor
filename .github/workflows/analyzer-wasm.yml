@@ -1,4 +1,4 @@
-name: Analyzer CI
+name: Analyzer WASM CI
 
 on:
   push:
@@ -15,8 +15,8 @@ on:
       - '.github/workflows/analyzer-ci.yml'
 
 jobs:
-  lint-and-test:
-    runs-on: ubuntu-latest
+  test-wasm:
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: analyzer
@@ -30,6 +30,20 @@ jobs:
       with:
         go-version: '1.24.4'
     
+    - name: Install chrome
+      uses: browser-actions/setup-chrome@v2
+      with:
+        chrome-version: stable
+    
+    - name: Install wasmbrowsertest
+      run: go install github.com/agnivade/wasmbrowsertest@latest
+
+    - name: Setup wasmexec
+      run: mv $(go env GOPATH)/bin/wasmbrowsertest $(go env GOPATH)/bin/go_js_wasm_exec
+    
+    - name: Install xvfb for headless testing
+      run: sudo apt-get update && sudo apt-get install -y xvfb
+
     - name: Cache Go modules
       uses: actions/cache@v4
       with:
@@ -40,27 +54,17 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
     
-    - name: Install dependencies
-      run: go mod download
-
     - name: Generate ANTLR parser
       run: ./codegen.sh
-    
-    - name: Install golangci-lint
-      uses: golangci/golangci-lint-action@v8
-      with:
-        version: latest
-        working-directory: analyzer
-        skip-cache: true
-     
-    - name: Run go vet
-      run: go vet ./core/... ./ffi/... ./wasm/...
-    
-    - name: Run golangci-lint
-      run: golangci-lint run
-    
-    - name: Run tests
-      run: go test ./... -v
-    
-    - name: Build all packages
-      run: go build ./...
+
+    - name: Build WASM  
+      run: go build ./wasm/analyzer.go
+      env:
+        GOOS: js
+        GOARCH: wasm
+
+    - name: Test WASM
+      run: go test ./wasm/...
+      env:
+        GOOS: js
+        GOARCH: wasm
