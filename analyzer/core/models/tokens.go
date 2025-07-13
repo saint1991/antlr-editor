@@ -43,7 +43,7 @@ type TokenInfo struct {
 
 func (t *TokenInfo) AsMap() map[string]any {
 	return map[string]any{
-		"type":    t.Type,
+		"type":    string(t.Type),
 		"text":    t.Text,
 		"start":   t.Start,
 		"end":     t.End,

@@ -20,12 +20,12 @@ func (r *AnalysisResult) IsValid() bool {
 }
 
 func (r *AnalysisResult) AsMap() map[string]any {
-	tokens := make([]map[string]any, len(r.Tokens))
+	tokens := make([]any, len(r.Tokens))
 	for i, token := range r.Tokens {
 		tokens[i] = token.AsMap()
 	}
 
-	errors := make([]map[string]any, len(r.Errors))
+	errors := make([]any, len(r.Errors))
 	for i, err := range r.Errors {
 		errors[i] = err.AsMap()
 	}
