@@ -1,0 +1,6 @@
+# No external dependencies required
+# This package uses only Python standard library modules:
+# - ctypes (for FFI)
+# - json (for data parsing)
+# - platform (for OS detection)
+# - pathlib (for file path handling)

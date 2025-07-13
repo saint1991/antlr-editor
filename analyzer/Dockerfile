@@ -60,3 +60,35 @@ RUN wasm-opt -O3 -o /go/dist/analyzer.wasm analyzer.wasm
 FROM scratch AS wasm-output
 
 COPY --from=wasm-builder /go/dist/analyzer.wasm /analyzer.wasm
+
+
+# FFI shared library build stage
+FROM golang:${GOLANG_TAG} AS ffi-builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libc6-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir /go/dist
+
+WORKDIR /go/src
+
+# Copy go module files
+COPY analyzer/go.mod analyzer/go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy source code
+COPY analyzer/ ./
+COPY --from=antlr-generator /antlr/parser/grammar/* ./gen/parser/
+
+# Build shared library for current platform
+RUN CGO_ENABLED=1 go build -buildmode=c-shared -o /go/dist/libanalyzer.so ./ffi/analyzer.go
+
+# Export FFI artifacts
+FROM scratch AS ffi-output
+
+COPY --from=ffi-builder /go/dist/libanalyzer.so /libanalyzer.so
+COPY --from=ffi-builder /go/dist/libanalyzer.h /libanalyzer.h
