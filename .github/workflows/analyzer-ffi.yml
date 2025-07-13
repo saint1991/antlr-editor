@@ -1,0 +1,46 @@
+name: Analyzer FFI CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'analyzer/**'
+      - 'grammar/**'
+      - '.github/workflows/analyzer-ffi.yml'
+  pull_request:
+    branches: [ '**', '!hotfix/**' ]
+    paths:
+      - 'analyzer/**'
+      - 'grammar/**'
+      - '.github/workflows/analyzer-ffi.yml'
+
+jobs:
+  build-ffi-docker:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build FFI artifacts with Docker
+      run: |
+        docker build --target ffi-output --output=type=local,dest=./ffi-artifacts -f analyzer/Dockerfile .
+    
+    - name: Verify FFI artifacts
+      run: |
+        ls -la ./ffi-artifacts/
+        
+        # Check if files exist
+        test -f ./ffi-artifacts/libanalyzer.so || exit 1
+        test -f ./ffi-artifacts/libanalyzer.h || exit 1
+        
+        # Check file sizes
+        so_size=$(stat -c%s ./ffi-artifacts/libanalyzer.so)
+        h_size=$(stat -c%s ./ffi-artifacts/libanalyzer.h)
+        
+        echo "libanalyzer.so size: $so_size bytes"
+        echo "libanalyzer.h size: $h_size bytes"
+        
+        # Ensure files are not empty
+        [ $so_size -gt 1000000 ] || { echo "libanalyzer.so seems too small"; exit 1; }
+        [ $h_size -gt 1000 ] || { echo "libanalyzer.h seems too small"; exit 1; }
+ 

@@ -69,3 +69,34 @@ RUN wasm-opt -O3 -o /go/dist/analyzer.wasm analyzer-tinygo.wasm
 FROM scratch AS wasm-output
 
 COPY --from=wasm-builder /go/dist/analyzer.wasm /analyzer.wasm
+
+
+# FFI build stage for C shared library
+FROM golang:${GOLANG_TAG} AS ffi-builder
+
+# Create working directories
+RUN mkdir -p /go/dist /go/src
+
+WORKDIR /go/src
+
+# Copy go module files
+COPY analyzer/go.mod analyzer/go.sum ./
+
+
+# Download dependencies
+RUN go mod download
+
+# Copy source code
+COPY analyzer/ ./
+COPY --from=antlr-generator /antlr/parser/grammar/* ./gen/parser/
+
+# Build FFI shared libraries for different platforms
+# Linux shared library (native build for the container architecture)
+RUN CGO_ENABLED=1 go build -buildmode=c-shared -o /go/dist/libanalyzer.so ./ffi/analyzer.go
+
+# Export FFI artifacts
+FROM scratch AS ffi-output
+
+# Copy shared libraries and header files
+COPY --from=ffi-builder /go/dist/libanalyzer.so /libanalyzer.so
+COPY --from=ffi-builder /go/dist/libanalyzer.h /libanalyzer.h

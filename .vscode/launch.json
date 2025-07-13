@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug CGO Application",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/analyzer/ffi",
+            "env": {
+                "CGO_ENABLED": "1"
+            },
+            "buildFlags": ["-tags=cgo"],
+            "showLog": true,
+            "logOutput": "debugger"
+        },
+        {
+            "name": "Test CGO Package",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}/analyzer/ffi",
+            "env": {
+                "CGO_ENABLED": "1"
+            },
+            "buildFlags": ["-tags=cgo"]
+        }
+    ]
+}
