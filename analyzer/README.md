@@ -12,10 +12,14 @@ This module provides parsing capabilities for mathematical and logical expressio
 analyzer/
 ├── go.mod              # Go module definition
 ├── go.sum              # Dependency checksums
-├── examples/
-│   └── main.go         # Basic usage examples and tests
-├── wasm/               # WebAssembly target (planned)
-├── ffi/                # Python FFI target (planned)
+├── main.go             # Basic usage examples and tests
+├── core/               # Core analyzer logic
+│   ├── app/            # Application layer
+│   ├── infrastructure/ # Infrastructure layer  
+│   └── models/         # Shared data structures
+├── wasm/               # WebAssembly target
+├── ffi/                # Python FFI target
+├── python/             # Python bindings and shared libraries
 └── gen/                # Generated ANTLR parser code (git-ignored)
     └── parser/
 ```
@@ -88,13 +92,73 @@ go run ./examples "[column_a] > 5"
 
 The analyzer can be compiled to WebAssembly for browser usage:
 
+```bash
+# Build WASM module (from analyzer directory)
+docker build --target wasm-output --output=type=local,dest=dist -f Dockerfile .
+```
 
 ## Python FFI Support
 
-### Python FFI Target (`ffi/`)
-- CGO-based shared library for Python integration
-- Native performance with Python convenience
-- Support for complex data structures
+The analyzer provides Python bindings through a C shared library interface.
+
+### Building the Python FFI Library
+
+```bash
+# Build FFI shared library using Docker
+docker build --target ffi-output --output=type=local,dest=python -f Dockerfile .
+
+# Or build directly with Go (requires ANTLR parser generation first)
+go build -buildmode=c-shared -o python/libanalyzer.dylib ./ffi/analyzer.go  # macOS
+go build -buildmode=c-shared -o python/libanalyzer.so ./ffi/analyzer.go    # Linux
+```
+
+### Using the Python Bindings
+
+```python
+# Basic usage
+from python.analyzer_ffi import AnalyzerFFI
+
+analyzer = AnalyzerFFI()
+
+# Validate expression syntax
+is_valid = analyzer.validate("2 + 3 * 4")
+print(f"Valid: {is_valid}")
+
+# Get detailed analysis
+result = analyzer.analyze("func(a, b)")
+print(f"Tokens: {len(result['tokens'])}")
+print(f"Errors: {len(result['errors'])}")
+
+# Convenience functions
+from python.analyzer_ffi import validate, analyze, get_tokens
+
+print(validate("x + y"))           # True
+tokens = get_tokens("2 + 3")       # List of token information
+result = analyze("invalid syntax") # Full analysis with errors
+```
+
+### Python FFI Features
+
+- **Expression validation**: Check syntax correctness
+- **Token analysis**: Get detailed token information for syntax highlighting  
+- **Error reporting**: Detailed error messages with line/column information
+- **Memory management**: Automatic cleanup of allocated strings
+- **Cross-platform**: Supports Linux, macOS, and Windows
+- **Zero dependencies**: Uses only Python standard library
+
+### Python Package Structure
+
+```
+python/
+├── __init__.py          # Package initialization
+├── analyzer_ffi.py      # Main FFI wrapper
+├── example.py           # Usage examples
+├── setup.py             # Python package setup
+├── requirements.txt     # Dependencies (none required)
+├── libanalyzer.so       # Shared library (Linux)
+├── libanalyzer.dylib    # Shared library (macOS)
+└── libanalyzer.h        # C header file
+```
 
 ## Architecture
 
