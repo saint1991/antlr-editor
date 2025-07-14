@@ -69,7 +69,7 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y binaryen
 
     - name: Build WASM with Go
-      run: go build ./wasm/analyzer.go
+      run: go build -o analyzer.wasm ./wasm/analyzer.go
       env:
         GOOS: js
         GOARCH: wasm
