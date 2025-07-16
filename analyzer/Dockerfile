@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -y \
 # Install TinyGo
 ARG TINYGO_VERSION=0.38.0
 RUN wget https://github.com/tinygo-org/tinygo/releases/download/v${TINYGO_VERSION}/tinygo_${TINYGO_VERSION}_amd64.deb \
-    && dpkg -i tinygo_${TINYGO_VERSION}_amd64.deb \
+    && dpkg -i --force-architecture tinygo_${TINYGO_VERSION}_amd64.deb \
     && rm tinygo_${TINYGO_VERSION}_amd64.deb
 
 # Create working directories
@@ -58,21 +58,14 @@ RUN go mod download
 COPY analyzer/ ./
 COPY --from=antlr-generator /antlr/parser/grammar/* ./gen/parser/
 
-# Build WASM module with standard Go (for comparison)
-RUN GOOS=js GOARCH=wasm go build -o analyzer-go.wasm ./wasm/analyzer.go
-
 # Build WASM module with TinyGo
 RUN tinygo build -o analyzer-tinygo.wasm -target wasm ./wasm/analyzer.go
 
 # Optimize both WASM binaries
-RUN wasm-opt -O3 -o /go/dist/analyzer-go.wasm analyzer-go.wasm
-RUN wasm-opt -O3 -o /go/dist/analyzer-tinygo.wasm analyzer-tinygo.wasm
-RUN wasm-opt -Oz --strip-debug -o /go/dist/analyzer.wasm analyzer-tinygo.wasm
+RUN wasm-opt -O3 -o /go/dist/analyzer.wasm analyzer-tinygo.wasm
 
 
 # Export WASM artifact
 FROM scratch AS wasm-output
 
 COPY --from=wasm-builder /go/dist/analyzer.wasm /analyzer.wasm
-COPY --from=wasm-builder /go/dist/analyzer-go.wasm /analyzer-go.wasm
-COPY --from=wasm-builder /go/dist/analyzer-tinygo.wasm /analyzer-tinygo.wasm

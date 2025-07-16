@@ -6,13 +6,13 @@ on:
     paths:
       - 'analyzer/**'
       - 'grammar/**'
-      - '.github/workflows/analyzer-ci.yml'
+      - '.github/workflows/analyzer-wasm.yml'
   pull_request:
     branches: [ '*', '!hotfix/**' ]
     paths:
       - 'analyzer/**'
       - 'grammar/**'
-      - '.github/workflows/analyzer-ci.yml'
+      - '.github/workflows/analyzer-wasm.yml'
 
 jobs:
   test-wasm:
@@ -28,7 +28,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.24.4'
+        go-version: '1.24'
     
     - name: Install chrome
       uses: browser-actions/setup-chrome@v2
@@ -55,7 +55,10 @@ jobs:
           ${{ runner.os }}-go-
     
     - name: Generate ANTLR parser
-      run: ./codegen.sh
+      run: |
+        cd ..
+        docker build --target antlr-generated --output=type=local,dest=analyzer/gen/parser -f analyzer/Dockerfile .
+        cd analyzer
 
     - name: Install TinyGo
       run: |
@@ -78,10 +81,8 @@ jobs:
       run: tinygo build -o analyzer-tinygo.wasm -target wasm ./wasm/analyzer.go
 
     - name: Optimize WASM binaries
-      run: |
-        wasm-opt -O3 -o analyzer-go-optimized.wasm analyzer.wasm
-        wasm-opt -Oz --strip-debug -o analyzer-optimized.wasm analyzer-tinygo.wasm
-        
+      run: wasm-opt -O3 -o analyzer-optimized.wasm analyzer-tinygo.wasm
+  
     - name: Compare WASM sizes
       run: |
         echo "WASM Binary Sizes:"
@@ -102,3 +103,16 @@ jobs:
       env:
         GOOS: js
         GOARCH: wasm
+
+  build-wasm-docker:
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Build WASM using Docker
+      run: |
+        docker build --target wasm-output --output=type=local,dest=. -f analyzer/Dockerfile .
+        ls -lh analyzer.wasm
+        echo "WASM binary built successfully: $(stat -c%s analyzer.wasm) bytes"
