@@ -45,8 +45,14 @@ go build ./...
 ### Building WASM
 
 ```bash
-# Build WASM module (from analyzer directory)
+# Build WASM module with standard Go (from analyzer directory)
 GOOS=js GOARCH=wasm go build -o analyzer.wasm ./wasm/analyzer.go
+
+# Build optimized WASM module with TinyGo and wasm-opt
+./build-wasm.sh
+
+# Run WASM size benchmark and comparison
+./benchmark-wasm.sh
 ```
 
 ## Project Structure
