@@ -24,6 +24,13 @@ To generate the Go ANTLR parser from grammar/Expression.g4, run the following co
 docker build --target antlr-generated --output=type=local,dest=analyzer/gen/parser -f analyzer/Dockerfile .
 ```
 
+To build the WASM binary using Docker:
+
+```bash
+# Build optimized WASM binary with TinyGo and wasm-opt
+docker build --target wasm-output --output=type=local,dest=. -f analyzer/Dockerfile .
+```
+
 For additional analyzer build commands, please see [analyzer/CLAUDE.md](./analyzer/CLAUDE.md).
 
 ## Project Structure
