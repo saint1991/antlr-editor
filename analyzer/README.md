@@ -12,10 +12,13 @@ This module provides parsing capabilities for mathematical and logical expressio
 analyzer/
 ├── go.mod              # Go module definition
 ├── go.sum              # Dependency checksums
-├── examples/
-│   └── main.go         # Basic usage examples and tests
-├── wasm/               # WebAssembly target (planned)
-├── ffi/                # Python FFI target (planned)
+├── main.go             # Basic usage examples and tests
+├── core/               # Core analyzer logic
+│   ├── app/            # Application layer
+│   ├── infrastructure/ # Infrastructure layer  
+│   └── models/         # Shared data structures
+├── wasm/               # WebAssembly target
+├── ffi/                # Python FFI target
 └── gen/                # Generated ANTLR parser code (git-ignored)
     └── parser/
 ```
@@ -88,13 +91,10 @@ go run ./examples "[column_a] > 5"
 
 The analyzer can be compiled to WebAssembly for browser usage:
 
-
-## Python FFI Support
-
-### Python FFI Target (`ffi/`)
-- CGO-based shared library for Python integration
-- Native performance with Python convenience
-- Support for complex data structures
+```bash
+# Build WASM module (from analyzer directory)
+docker build --target wasm-output --output=type=local,dest=dist -f Dockerfile .
+```
 
 ## Architecture
 

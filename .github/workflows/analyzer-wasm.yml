@@ -60,44 +60,6 @@ jobs:
         docker build --target antlr-generated --output=type=local,dest=analyzer/gen/parser -f analyzer/Dockerfile .
         cd analyzer
 
-    - name: Install TinyGo
-      run: |
-        wget https://github.com/tinygo-org/tinygo/releases/download/v${TINYGO_VERSION}/tinygo_${TINYGO_VERSION}_amd64.deb
-        sudo dpkg -i tinygo_${TINYGO_VERSION}_amd64.deb
-        rm tinygo_${TINYGO_VERSION}_amd64.deb
-      env:
-        TINYGO_VERSION: '0.38.0'
-        
-    - name: Install wasm-opt
-      run: sudo apt-get update && sudo apt-get install -y binaryen
-
-    - name: Build WASM with Go
-      run: go build -o analyzer.wasm ./wasm/analyzer.go
-      env:
-        GOOS: js
-        GOARCH: wasm
-
-    - name: Build WASM with TinyGo
-      run: tinygo build -o analyzer-tinygo.wasm -target wasm ./wasm/analyzer.go
-
-    - name: Optimize WASM binaries
-      run: wasm-opt -O3 -o analyzer-optimized.wasm analyzer-tinygo.wasm
-  
-    - name: Compare WASM sizes
-      run: |
-        echo "WASM Binary Sizes:"
-        ls -lh *.wasm | awk '{print $5 "\t" $9}'
-        echo ""
-        echo "Size comparison (Go vs TinyGo):"
-        GO_SIZE=$(stat -c%s analyzer.wasm)
-        TINYGO_SIZE=$(stat -c%s analyzer-tinygo.wasm)
-        OPTIMIZED_SIZE=$(stat -c%s analyzer-optimized.wasm)
-        echo "Standard Go: $GO_SIZE bytes"
-        echo "TinyGo: $TINYGO_SIZE bytes"
-        echo "TinyGo + wasm-opt: $OPTIMIZED_SIZE bytes"
-        REDUCTION=$(( (GO_SIZE - OPTIMIZED_SIZE) * 100 / GO_SIZE ))
-        echo "Size reduction: $REDUCTION%"
-
     - name: Test WASM
       run: go test ./wasm/...
       env:
