@@ -1,0 +1,60 @@
+{
+  "name": "ANTLR Editor Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "options": [
+      "--platform=linux/amd64"
+    ],
+    "args": {
+      "TZ": "${localEnv:TZ:Asia/Tokyo}"
+    }
+  },
+  "runArgs": [
+    "--cap-add=NET_ADMIN",
+    "--cap-add=NET_RAW"
+  ],
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli": {},
+    "ghcr.io/guiyomh/features/golangci-lint:0": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go",
+        "antlr.antlr4",
+        "editorconfig.editorconfig",
+        "ms-azuretools.vscode-docker",
+        "ms-playwright.playwright"
+      ],
+      "settings": {
+        "go.useLanguageServer": true,
+        "go.lintTool": "golangci-lint",
+        "go.lintOnSave": "file",
+        "go.formatTool": "goimports",
+        "go.toolsManagement.autoUpdate": true,
+        "editor.formatOnSave": true,
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true,
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "bash",
+            "icon": "terminal-bash"
+          },
+          "zsh": {
+            "path": "zsh"
+          }
+        }
+      }
+    }
+  },
+  "postCreateCommand": "sudo /usr/local/bin/init-firewall.sh",
+  "remoteUser": "node",
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.p10k.zsh,target=/home/node/.p10k.zsh,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.zinit.zsh,target=/home/node/.zinit.zsh,type=bind,consistency=cached"
+  ],
+  "workspaceFolder": "/workspace",
+  "forwardPorts": []
+}
