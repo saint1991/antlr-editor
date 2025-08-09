@@ -1,4 +1,7 @@
-FROM node:24.4-bookworm
+ARG NODE_VERSION=24.5
+ARG GO_VERSION=1.24.6
+
+FROM node:${NODE_VERSION}-bookworm
 
 ARG TZ
 ENV TZ="$TZ"
@@ -77,7 +80,7 @@ RUN mkdir -p /workspace /home/node/.claude && \
 WORKDIR /workspace
 
 # Install Go
-ARG GO_VERSION=1.24.5
+ARG GO_VERSION
 RUN wget https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
   tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
   rm go${GO_VERSION}.linux-amd64.tar.gz && \

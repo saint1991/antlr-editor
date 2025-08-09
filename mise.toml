@@ -1,0 +1,12 @@
+[tools]
+go = "1.24.6"
+node = "24.5"
+python = "3.13.6"
+
+[tasks.claude]
+description = "Run claude in bypass-permission mode in sandbox"
+run = "devcontainer up --workspace-folder . && claude --dangerously-skip-permissions"
+
+[tasks.sandbox-down]
+description = "Shutdown the sandbox"
+run = "docker ps | grep 'vsc-antlr-editor' | awk '{print $1}' | xargs -r docker stop && docker ps -a | grep 'vsc-antlreditor' | awk '{print $1}' | xargs -r docker rm -f"
