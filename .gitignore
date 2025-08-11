@@ -2,3 +2,8 @@
 
 # Generated analyzer code
 analyzer/gen/
+libanalyzer.so
+libanalyzer.dylib
+libanalyzer.h
+
+*.egg-info/

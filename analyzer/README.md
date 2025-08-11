@@ -96,6 +96,14 @@ The analyzer can be compiled to WebAssembly for browser usage:
 docker build --target wasm-output --output=type=local,dest=dist -f Dockerfile .
 ```
 
+## FFI Support
+
+The analyzer can be compiled to c-shared library.
+
+```bash
+go build -buildmode=c-shared ffi/analyzer.go
+```
+
 ## Architecture
 
 The parser module follows Go project conventions:
