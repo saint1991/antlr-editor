@@ -100,3 +100,37 @@ FROM scratch AS ffi-output
 # Copy shared libraries and header files
 COPY --from=ffi-builder /go/dist/libanalyzer.so /libanalyzer.so
 COPY --from=ffi-builder /go/dist/libanalyzer.h /libanalyzer.h
+
+
+# Python wheel build stage
+FROM python:3.12-slim-bookworm AS python-wheel-builder
+
+# Install build dependencies
+RUN apt-get update -y && apt-get install -y \
+    gcc \
+    g++ \
+    make \
+ && rm -rf /var/lib/apt/lists/*
+
+# Install Python build tools and uv
+RUN pip install --no-cache-dir uv
+
+# Create working directory
+RUN mkdir -p /build
+WORKDIR /build
+
+# Copy Python FFI package files
+COPY analyzer/ffi/python/ /build
+
+# Copy generated ANTLR parser
+COPY --from=ffi-builder /go/dist/libanalyzer.so /build/src/analyzer/libanalyzer.so
+COPY --from=ffi-builder /go/dist/libanalyzer.h /build/src/analyzer/libanalyzer.h
+
+# Build Python wheel
+RUN uv build --wheel --out-dir dist
+
+
+# Export Python wheel artifact
+FROM scratch AS python-wheel-output
+
+COPY --from=python-wheel-builder /build/dist/*.whl /

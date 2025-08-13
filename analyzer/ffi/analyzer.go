@@ -119,20 +119,9 @@ func ValidateFFIString(expression *C.char) C.int {
 	return 0
 }
 
-// AnalyzeStructFFI analyzes expression and returns structured data (no JSON)
-// The caller is responsible for freeing the returned struct using FreeAnalysisResult
-//
-//export AnalyzeStructFFI
-func AnalyzeStructFFI(expression *C.char, length C.int) *C.CAnalysisResult {
-	if expression == nil {
-		return nil
-	}
-
-	// Convert C string to Go string
-	expressionStr := C.GoStringN(expression, length)
-
+func analyze(expression string) *C.CAnalysisResult {
 	// Get analysis result
-	result := analyzer.Analyze(expressionStr)
+	result := analyzer.Analyze(expression)
 
 	// Allocate C struct
 	cResult := (*C.CAnalysisResult)(C.malloc(C.sizeof_CAnalysisResult))
@@ -171,6 +160,37 @@ func AnalyzeStructFFI(expression *C.char, length C.int) *C.CAnalysisResult {
 	}
 
 	return cResult
+}
+
+// AnalyzeFFI analyzes expression and returns AnalysisResult struct
+// The caller is responsible for freeing the returned struct using FreeAnalysisResult
+//
+//export AnalyzeFFI
+func AnalyzeFFI(expression *C.char, length C.int) *C.CAnalysisResult {
+	if expression == nil {
+		return nil
+	}
+
+	// Convert C string to Go string
+	expressionStr := C.GoStringN(expression, length)
+
+	return analyze(expressionStr)
+}
+
+// AnalyzeFFIString analyzes a null-terminated C string expression
+// and returns AnalysisResult struct
+// The caller is responsible for freeing the returned struct using FreeAnalysisResult
+//
+//export AnalyzeFFIString
+func AnalyzeFFIString(expression *C.char) *C.CAnalysisResult {
+	if expression == nil {
+		return nil
+	}
+
+	// Convert C string to Go string
+	expressionStr := C.GoString(expression)
+
+	return analyze(expressionStr)
 }
 
 // FreeAnalysisResult frees the memory allocated by AnalyzeStructFFI
