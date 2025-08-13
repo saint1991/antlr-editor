@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=45", "wheel"]
+requires = ["setuptools>=45", "build>=1.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -34,10 +34,19 @@ Source = "https://github.com/saint1991/antlr-editor"
 [project.optional-dependencies]
 build = [
     "setuptools>=80.9.0",
-    "wheel",
+    "build>=1.3",
 ]
 
 [dependency-groups]
 dev = [
     "ruff>=0.12.8",
 ]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+analyzer = ["*.so", "*.dylib", "*.dll", "*.h"]

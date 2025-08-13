@@ -3,9 +3,11 @@ from dataclasses import dataclass
 from .token import TokenInfo
 from .error import ErrorInfo
 
+
 @dataclass(frozen=True)
 class AnalysisResult:
     """Result of analyzing an expression."""
+
     tokens: list[TokenInfo]
     errors: list[ErrorInfo]
 

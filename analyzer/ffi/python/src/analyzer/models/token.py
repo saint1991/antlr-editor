@@ -4,6 +4,7 @@ from enum import IntEnum
 
 class TokenType(IntEnum):
     """Token types for expression analysis."""
+
     STRING = 0
     INTEGER = 1
     FLOAT = 2
@@ -24,6 +25,7 @@ class TokenType(IntEnum):
 @dataclass(frozen=True)
 class TokenInfo:
     """Information about a token in the expression."""
+
     token_type: TokenType
     text: str
     start: int
