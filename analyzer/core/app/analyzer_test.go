@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"antlr-editor/parser/core/models"
+	"antlr-editor/analyzer/core/models"
 )
 
 func TestAnalyzer_Validate(t *testing.T) {
