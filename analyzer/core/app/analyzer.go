@@ -3,9 +3,9 @@ package app
 import (
 	"github.com/antlr4-go/antlr/v4"
 
-	"antlr-editor/parser/core/infrastructure"
-	"antlr-editor/parser/core/models"
-	"antlr-editor/parser/gen/parser"
+	"antlr-editor/analyzer/core/infrastructure"
+	"antlr-editor/analyzer/core/models"
+	"antlr-editor/analyzer/gen/parser"
 )
 
 // AnalysisResult contains the complete analysis result

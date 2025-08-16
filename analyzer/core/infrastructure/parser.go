@@ -3,7 +3,7 @@ package infrastructure
 import (
 	"github.com/antlr4-go/antlr/v4"
 
-	"antlr-editor/parser/gen/parser"
+	"antlr-editor/analyzer/gen/parser"
 )
 
 // ParserContext holds the components needed for parsing

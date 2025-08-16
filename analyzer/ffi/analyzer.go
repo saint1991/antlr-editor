@@ -12,8 +12,8 @@ import "C"
 import (
 	"unsafe"
 
-	"antlr-editor/parser/core/app"
-	"antlr-editor/parser/core/models"
+	"antlr-editor/analyzer/core/app"
+	"antlr-editor/analyzer/core/models"
 )
 
 // TokenType to C enum mapping
@@ -232,6 +232,45 @@ func FreeString(s *C.char) {
 		// Free the C string allocated by C.CString
 		C.free(unsafe.Pointer(s))
 	}
+}
+
+// FormatFFI formats expression and returns formatted string
+// The caller is responsible for freeing the returned string using FreeString
+//
+//export FormatFFI
+func FormatFFI(expression *C.char, length C.int) *C.char {
+	if expression == nil {
+		return nil
+	}
+
+	// Convert C string to Go string
+	expressionStr := C.GoStringN(expression, length)
+
+	// Format the expression
+	formatted := analyzer.Format(expressionStr)
+
+	// Return C string (caller must free)
+	return C.CString(formatted)
+}
+
+// FormatFFIString formats a null-terminated C string expression
+// and returns formatted string
+// The caller is responsible for freeing the returned string using FreeString
+//
+//export FormatFFIString
+func FormatFFIString(expression *C.char) *C.char {
+	if expression == nil {
+		return nil
+	}
+
+	// Convert C string to Go string
+	expressionStr := C.GoString(expression)
+
+	// Format the expression
+	formatted := analyzer.Format(expressionStr)
+
+	// Return C string (caller must free)
+	return C.CString(formatted)
 }
 
 // main function required for FFI builds
