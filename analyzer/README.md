@@ -25,7 +25,7 @@ analyzer/
 
 ## Dependencies
 
-- **Go**: 1.24.4 or later
+- **Go**: 1.24.6 or later
 - **ANTLR4 Go Runtime**: v4.13.1
 - **Docker**: Required for parser code generation
 

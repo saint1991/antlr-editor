@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"antlr-editor/parser/core/app"
+	"antlr-editor/analyzer/core/app"
 )
 
 func main() {

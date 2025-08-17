@@ -3,7 +3,7 @@ package infrastructure
 import (
 	"github.com/antlr4-go/antlr/v4"
 
-	"antlr-editor/parser/core/models"
+	"antlr-editor/analyzer/core/models"
 )
 
 // BaseErrorListener provides common error handling functionality
