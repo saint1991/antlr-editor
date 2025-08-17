@@ -98,9 +98,17 @@ class Analyzer:
         self._lib.AnalyzeFFI.argtypes = [ctypes.c_char_p, ctypes.c_int]
         self._lib.AnalyzeFFI.restype = ctypes.POINTER(CAnalysisResult)
 
+        # FormatFFI
+        self._lib.FormatFFI.argtypes = [ctypes.c_char_p, ctypes.c_int]
+        self._lib.FormatFFI.restype = ctypes.c_char_p
+
         # FreeAnalysisResult
         self._lib.FreeAnalysisResult.argtypes = [ctypes.POINTER(CAnalysisResult)]
         self._lib.FreeAnalysisResult.restype = None
+
+        # FreeString
+        self._lib.FreeString.argtypes = [ctypes.POINTER(ctypes.c_char)]
+        self._lib.FreeString.restype = None
 
     def validate(self, expression: str) -> bool:
         """
@@ -173,3 +181,29 @@ class Analyzer:
         finally:
             # Free the C memory
             self._lib.FreeAnalysisResult(c_result_ptr)
+
+    def format(self, expression: str) -> str:
+        """
+        Format an expression.
+
+        Args:
+            expression: The expression to format.
+
+        Returns:
+            The formatted expression string.
+        """
+        if not expression:
+            return ""
+
+        expr_bytes = expression.encode("utf-8")
+        result_ptr = self._lib.FormatFFI(expr_bytes, len(expr_bytes))
+
+        if not result_ptr:
+            return expression
+
+        try:
+            formatted = ctypes.string_at(result_ptr).decode("utf-8")
+        finally:
+            # Free the C memory allocated for the formatted string
+            self._lib.FreeString(result_ptr)
+        return formatted

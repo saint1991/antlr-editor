@@ -6,6 +6,24 @@ import (
 	"antlr-editor/analyzer/gen/parser"
 )
 
+var (
+	tokenType2Operator = map[int]string{
+		parser.ExpressionLexerADD: "+",
+		parser.ExpressionLexerSUB: "-",
+		parser.ExpressionLexerMUL: "*",
+		parser.ExpressionLexerDIV: "/",
+		parser.ExpressionLexerLT:  "<",
+		parser.ExpressionLexerLE:  "<=",
+		parser.ExpressionLexerGT:  ">",
+		parser.ExpressionLexerGE:  ">=",
+		parser.ExpressionLexerEQ:  "==",
+		parser.ExpressionLexerNEQ: "!=",
+		parser.ExpressionLexerAND: "&&",
+		parser.ExpressionLexerOR:  "||",
+		parser.ExpressionLexerPOW: "^",
+	}
+)
+
 // FormatVisitor implements the ExpressionVisitor interface for formatting
 type FormatVisitor struct {
 	*parser.BaseExpressionVisitor
@@ -34,133 +52,30 @@ func (v *FormatVisitor) Visit(tree antlr.ParseTree) any {
 	return tree.Accept(v)
 }
 
-type HasChildContext interface {
-	Expression(i int) parser.IExpressionContext
+// VisitLiteralExpr formats a literal expression
+func (v *FormatVisitor) VisitLiteralExpr(ctx *parser.LiteralExprContext) any {
+	return v.Visit(ctx.Literal())
 }
 
-func (v *FormatVisitor) visitBinaryExpression(ctx HasChildContext, operator string) any {
-	v.ctx.enterExpression()
-	defer v.ctx.exitExpression()
-
-	left := ctx.Expression(0)
-	right := ctx.Expression(1)
-
-	// Visit left operand
-	v.Visit(left)
-
-	// Estimate the length of the remaining expression
-	rightText := right.GetText()
-	estimatedLength := len(operator) + len(rightText) + 4 // operator + spaces + rough estimate
-
-	// Check if we need to break the line before this operator
-	if v.ctx.options.BreakLongExpressions &&
-		((v.ctx.column + estimatedLength) > v.ctx.options.MaxLineLength) {
-		v.ctx.writeNewlineWithIndent()
-		v.ctx.write(operator)
-		v.ctx.writeSpaceAroundOperators()
-		v.ctx.decreaseIndent()
-	} else {
-		v.ctx.writeSpaceAroundOperators()
-		v.ctx.write(operator)
-		v.ctx.writeSpaceAroundOperators()
-	}
-
-	// Visit right operand
-	v.Visit(right)
-
+// VisitLiteral formats a literal value
+func (v *FormatVisitor) VisitLiteral(ctx *parser.LiteralContext) any {
+	// Get the literal text and write it as-is
+	v.ctx.write(ctx.GetText())
 	return nil
 }
 
-// VisitAndExpr formats a logical AND expression
-func (v *FormatVisitor) VisitAndExpr(ctx *parser.AndExprContext) any {
-	return v.visitBinaryExpression(ctx, "&&")
+// VisitColumnRefExpr formats a column reference expression
+func (v *FormatVisitor) VisitColumnRefExpr(ctx *parser.ColumnRefExprContext) any {
+	return v.Visit(ctx.ColumnReference())
 }
 
-// VisitOrExpr formats a logical OR expression
-func (v *FormatVisitor) VisitOrExpr(ctx *parser.OrExprContext) any {
-	return v.visitBinaryExpression(ctx, "||")
-}
-
-// VisitComparisonExpr formats a comparison expression
-func (v *FormatVisitor) VisitComparisonExpr(ctx *parser.ComparisonExprContext) any {
-	// Get the operator
-	var op string
-	for _, child := range ctx.GetChildren() {
-		if terminalNode, ok := child.(antlr.TerminalNode); ok {
-			switch terminalNode.GetSymbol().GetTokenType() {
-			case parser.ExpressionLexerLT:
-				op = "<"
-			case parser.ExpressionLexerLE:
-				op = "<="
-			case parser.ExpressionLexerGT:
-				op = ">"
-			case parser.ExpressionLexerGE:
-				op = ">="
-			case parser.ExpressionLexerEQ:
-				op = "=="
-			case parser.ExpressionLexerNEQ:
-				op = "!="
-			}
-			break
-		}
+// VisitColumnReference formats a column reference
+func (v *FormatVisitor) VisitColumnReference(ctx *parser.ColumnReferenceContext) any {
+	v.ctx.write("[")
+	if ctx.IDENTIFIER() != nil {
+		v.ctx.write(ctx.IDENTIFIER().GetText())
 	}
-
-	return v.visitBinaryExpression(ctx, op)
-}
-
-// VisitAddSubExpr formats an addition/subtraction expression
-func (v *FormatVisitor) VisitAddSubExpr(ctx *parser.AddSubExprContext) any {
-	// Get the operator
-	var op string
-	for _, child := range ctx.GetChildren() {
-		if terminalNode, ok := child.(antlr.TerminalNode); ok {
-			switch terminalNode.GetSymbol().GetTokenType() {
-			case parser.ExpressionLexerADD:
-				op = "+"
-			case parser.ExpressionLexerSUB:
-				op = "-"
-			}
-			break
-		}
-	}
-
-	return v.visitBinaryExpression(ctx, op)
-}
-
-// VisitMulDivExpr formats a multiplication/division expression
-func (v *FormatVisitor) VisitMulDivExpr(ctx *parser.MulDivExprContext) any {
-	// Get the operator
-	var op string
-	for _, child := range ctx.GetChildren() {
-		if terminalNode, ok := child.(antlr.TerminalNode); ok {
-			switch terminalNode.GetSymbol().GetTokenType() {
-			case parser.ExpressionLexerMUL:
-				op = "*"
-			case parser.ExpressionLexerDIV:
-				op = "/"
-			}
-			break
-		}
-	}
-
-	return v.visitBinaryExpression(ctx, op)
-}
-
-// VisitPowerExpr formats a power expression
-func (v *FormatVisitor) VisitPowerExpr(ctx *parser.PowerExprContext) any {
-	v.ctx.enterExpression()
-	defer v.ctx.exitExpression()
-
-	// Visit left operand
-	v.Visit(ctx.Expression(0))
-
-	v.ctx.writeSpaceAroundOperators()
-	v.ctx.write("^")
-	v.ctx.writeSpaceAroundOperators()
-
-	// Visit right operand (power is right-associative)
-	v.Visit(ctx.Expression(1))
-
+	v.ctx.write("]")
 	return nil
 }
 
@@ -179,36 +94,9 @@ func (v *FormatVisitor) VisitUnaryMinusExpr(ctx *parser.UnaryMinusExprContext) a
 	return nil
 }
 
-// VisitLiteralExpr formats a literal expression
-func (v *FormatVisitor) VisitLiteralExpr(ctx *parser.LiteralExprContext) any {
-	return v.Visit(ctx.Literal())
-}
-
-// VisitColumnRefExpr formats a column reference expression
-func (v *FormatVisitor) VisitColumnRefExpr(ctx *parser.ColumnRefExprContext) any {
-	return v.Visit(ctx.ColumnReference())
-}
-
 // VisitFunctionCallExpr formats a function call expression
 func (v *FormatVisitor) VisitFunctionCallExpr(ctx *parser.FunctionCallExprContext) any {
 	return v.Visit(ctx.FunctionCall())
-}
-
-// VisitLiteral formats a literal value
-func (v *FormatVisitor) VisitLiteral(ctx *parser.LiteralContext) any {
-	// Get the literal text and write it as-is
-	v.ctx.write(ctx.GetText())
-	return nil
-}
-
-// VisitColumnReference formats a column reference
-func (v *FormatVisitor) VisitColumnReference(ctx *parser.ColumnReferenceContext) any {
-	v.ctx.write("[")
-	if ctx.IDENTIFIER() != nil {
-		v.ctx.write(ctx.IDENTIFIER().GetText())
-	}
-	v.ctx.write("]")
-	return nil
 }
 
 // VisitFunctionCall formats a function call
@@ -289,4 +177,99 @@ func (v *FormatVisitor) visitArgumentListMultiLine(expressions []parser.IExpress
 		}
 		v.Visit(expr)
 	}
+}
+
+type HasExpressionContext interface {
+	antlr.ParserRuleContext
+	Expression(i int) parser.IExpressionContext
+}
+
+func (v *FormatVisitor) visitBinaryExpression(ctx HasExpressionContext) any {
+	v.ctx.enterExpression()
+	defer v.ctx.exitExpression()
+
+	left := ctx.Expression(0)
+	right := ctx.Expression(1)
+
+	operator := ""
+	if operatorNode := ctx.GetChild(1); operatorNode != nil {
+		if terminalNode, ok := operatorNode.(antlr.TerminalNode); ok {
+			if op, exists := tokenType2Operator[terminalNode.GetSymbol().GetTokenType()]; exists {
+				operator = op
+			} else {
+				operator = terminalNode.GetText() // Fallback to raw text if not found
+			}
+		}
+	}
+	if operator == "" {
+		panic("Operator not found in binary expression context")
+	}
+
+	// Visit left operand
+	v.Visit(left)
+
+	// Estimate the length of the remaining expression
+	rightText := right.GetText()
+	estimatedLength := len(operator) + len(rightText) + 4 // operator + spaces + rough estimate
+
+	// Check if we need to break the line before this operator
+	if v.ctx.options.BreakLongExpressions &&
+		((v.ctx.column + estimatedLength) > v.ctx.options.MaxLineLength) {
+		v.ctx.writeNewlineWithIndent()
+		v.ctx.write(operator)
+		v.ctx.writeSpaceAroundOperators()
+		v.ctx.decreaseIndent()
+	} else {
+		v.ctx.writeSpaceAroundOperators()
+		v.ctx.write(operator)
+		v.ctx.writeSpaceAroundOperators()
+	}
+
+	// Visit right operand
+	v.Visit(right)
+
+	return nil
+}
+
+// VisitAndExpr formats a logical AND expression
+func (v *FormatVisitor) VisitAndExpr(ctx *parser.AndExprContext) any {
+	return v.visitBinaryExpression(ctx)
+}
+
+// VisitOrExpr formats a logical OR expression
+func (v *FormatVisitor) VisitOrExpr(ctx *parser.OrExprContext) any {
+	return v.visitBinaryExpression(ctx)
+}
+
+// VisitComparisonExpr formats a comparison expression
+func (v *FormatVisitor) VisitComparisonExpr(ctx *parser.ComparisonExprContext) any {
+	return v.visitBinaryExpression(ctx)
+}
+
+// VisitAddSubExpr formats an addition/subtraction expression
+func (v *FormatVisitor) VisitAddSubExpr(ctx *parser.AddSubExprContext) any {
+	return v.visitBinaryExpression(ctx)
+}
+
+// VisitMulDivExpr formats a multiplication/division expression
+func (v *FormatVisitor) VisitMulDivExpr(ctx *parser.MulDivExprContext) any {
+	return v.visitBinaryExpression(ctx)
+}
+
+// VisitPowerExpr formats a power expression
+func (v *FormatVisitor) VisitPowerExpr(ctx *parser.PowerExprContext) any {
+	v.ctx.enterExpression()
+	defer v.ctx.exitExpression()
+
+	// Visit left operand
+	v.Visit(ctx.Expression(0))
+
+	v.ctx.writeSpaceAroundOperators()
+	v.ctx.write("^")
+	v.ctx.writeSpaceAroundOperators()
+
+	// Visit right operand (power is right-associative)
+	v.Visit(ctx.Expression(1))
+
+	return nil
 }

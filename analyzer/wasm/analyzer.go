@@ -7,6 +7,7 @@ import (
 	"syscall/js"
 
 	"antlr-editor/analyzer/core/app"
+	"antlr-editor/analyzer/core/app/formatter"
 )
 
 // Global instances for WASM usage
@@ -68,7 +69,7 @@ func formatWithOptions(this js.Value, args []js.Value) any {
 	optionsJS := args[1]
 
 	// Extract options from JavaScript object
-	options := app.DefaultFormatOptions()
+	options := formatter.DefaultFormatOptions()
 
 	if !optionsJS.IsNull() && !optionsJS.IsUndefined() {
 		if indentSize := optionsJS.Get("indentSize"); !indentSize.IsUndefined() {
@@ -80,17 +81,8 @@ func formatWithOptions(this js.Value, args []js.Value) any {
 		if spaceAroundOps := optionsJS.Get("spaceAroundOps"); !spaceAroundOps.IsUndefined() {
 			options = options.WithSpaceAroundOps(spaceAroundOps.Bool())
 		}
-		if uppercaseFunctions := optionsJS.Get("uppercaseFunctions"); !uppercaseFunctions.IsUndefined() {
-			options = options.WithUppercaseFunctions(uppercaseFunctions.Bool())
-		}
-		if removeUnnecessaryParens := optionsJS.Get("removeUnnecessaryParens"); !removeUnnecessaryParens.IsUndefined() {
-			options = options.WithRemoveUnnecessaryParens(removeUnnecessaryParens.Bool())
-		}
 		if breakLongExpressions := optionsJS.Get("breakLongExpressions"); !breakLongExpressions.IsUndefined() {
 			options = options.WithBreakLongExpressions(breakLongExpressions.Bool())
-		}
-		if alignOperators := optionsJS.Get("alignOperators"); !alignOperators.IsUndefined() {
-			options = options.WithAlignOperators(alignOperators.Bool())
 		}
 	}
 

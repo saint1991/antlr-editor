@@ -31,6 +31,5 @@ func (app *App) Format(expression string) string {
 
 // FormatWithOptions formats the given expression string using specified formatting options
 func (app *App) FormatWithOptions(expression string, options *formatter.FormatOptions) string {
-	formatter := NewFormatterWithOptions(options)
-	return formatter.Format(expression)
+	return NewFormatterWithOptions(options).Format(expression)
 }

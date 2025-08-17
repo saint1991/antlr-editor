@@ -23,12 +23,12 @@ All operators have spaces before and after them:
 - No spaces inside brackets for column references: `[column]` not `[ column ]`
 - Function calls have no space before parentheses: `FUNC(...)` not `FUNC (...)`
 
-### Function Call Formatting (Python-style)
+### Function Call Formatting
 
 #### Basic Rules
 - No space between function name and opening parenthesis: `FUNC(` not `FUNC (`
 - Space after each comma in arguments: `FUNC(arg1, arg2, arg3)`
-- No trailing comma after the last argument (unless multi-line)
+- No trailing comma after the last argument
 - Closing parenthesis immediately follows last argument or is on its own line
 
 #### Single-line Function Calls
@@ -72,33 +72,7 @@ FUNC(
 
 ## Operator Precedence and Parentheses
 
-### Precedence Order (highest to lowest)
-1. Unary minus: `-expression`
-2. Power: `^` (right-associative)
-3. Multiplication/Division: `*`, `/`
-4. Addition/Subtraction: `+`, `-`
-5. Comparison: `<`, `<=`, `>`, `>=`, `==`, `!=`
-6. Logical AND: `&&`
-7. Logical OR: `||`
-
-### Parentheses Rules
-- **Remove unnecessary parentheses** when precedence is clear
-- **Keep parentheses** that change evaluation order or improve readability
-- **Add parentheses** to clarify complex expressions
-
-**Examples:**
-- Input: `((([a] + [b])) * ([c]))`
-- Output: `([a] + [b]) * [c]`
-
-- Input: `[a] + [b] * [c]`
-- Output: `[a] + [b] * [c]` (no parentheses needed due to precedence)
-
 ## Line Breaking and Indentation
-
-### Line Length
-- Default maximum line length: 80 characters
-- Break at lower-precedence operators first
-- Logical operators (`&&`, `||`) are preferred break points
 
 ### Break Rules
 1. **All binary operators except power operator**: Can break before the operator when line is too long
@@ -120,7 +94,6 @@ FUNC(
 
 ### Function Names
 - Function names remain in uppercase: `FUNC`, `MAX`, `MIN`
-- No changes to function name casing
 
 ### Literals
 - **Strings**: Preserve original quotes (single or double)
@@ -228,10 +201,7 @@ The formatter supports the following configuration options:
 | `IndentSize` | int | 2 | Number of spaces per indent level |
 | `MaxLineLength` | int | 80 | Maximum line length before breaking |
 | `SpaceAroundOps` | bool | true | Add spaces around operators |
-| `UppercaseFunctions` | bool | true | Keep function names uppercase |
-| `RemoveUnnecessaryParens` | bool | true | Remove redundant parentheses |
 | `BreakLongExpressions` | bool | true | Auto-break long expressions |
-| `AlignOperators` | bool | false | Vertically align operators (future) |
 
 ## Edge Cases
 
@@ -246,10 +216,3 @@ The formatter supports the following configuration options:
 ### Invalid Expression
 - Expressions with syntax errors are not formatted
 - Original expression is returned unchanged
-
-## Future Enhancements
-
-1. **Comment preservation**: Maintain comments in formatted output
-2. **Vertical alignment**: Align operators in multi-line expressions
-3. **Custom break rules**: User-defined line break preferences
-4. **Style presets**: SQL-style, Math-style, Compact-style options

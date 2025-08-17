@@ -88,7 +88,7 @@ func TestAnalyzeExpression(t *testing.T) {
 		{
 			name:        "invalid expression",
 			expression:  "1 + + 2",
-			wantTokens:  8, // エラーがあってもトークンは返される
+			wantTokens:  8, // returns token even for invalid expressions
 			wantErrors:  1,
 			checkTokens: true,
 		},
@@ -136,6 +136,235 @@ func TestAnalyzeExpression(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestFormatExpression(t *testing.T) {
+	tests := []struct {
+		name       string
+		expression string
+		want       string
+	}{
+		{
+			name:       "simple addition",
+			expression: "1+2",
+			want:       "1 + 2",
+		},
+		{
+			name:       "already formatted expression",
+			expression: "1 + 2",
+			want:       "1 + 2",
+		},
+		{
+			name:       "complex expression with parentheses",
+			expression: "(1+2)*3",
+			want:       "(1 + 2) * 3",
+		},
+		{
+			name:       "nested parentheses",
+			expression: "((1+2)*3)/4",
+			want:       "((1 + 2) * 3) / 4",
+		},
+		{
+			name:       "function call",
+			expression: "MAX(1,2,3)",
+			want:       "MAX(1, 2, 3)",
+		},
+		{
+			name:       "nested function calls",
+			expression: "SUM(MAX(1,2),MIN(3,4))",
+			want:       "SUM(MAX(1, 2), MIN(3, 4))",
+		},
+		{
+			name:       "column reference",
+			expression: "[column_a]+[column_b]",
+			want:       "[column_a] + [column_b]",
+		},
+		{
+			name:       "comparison operators",
+			expression: "[value]>10",
+			want:       "[value] > 10",
+		},
+		{
+			name:       "logical operators",
+			expression: "[a]>5&&[b]<10",
+			want:       "[a] > 5 && [b] < 10",
+		},
+		{
+			name:       "mixed operators",
+			expression: "[price]*1.1+[tax]",
+			want:       "[price] * 1.1 + [tax]",
+		},
+		{
+			name:       "string literal",
+			expression: `"hello"+"world"`,
+			want:       `"hello" + "world"`,
+		},
+		{
+			name:       "empty expression",
+			expression: "",
+			want:       "",
+		},
+		{
+			name:       "invalid expression",
+			expression: "1 + + 2",
+			want:       "", // formatter returns empty string for invalid expressions
+		},
+		{
+			name:       "expression with extra spaces",
+			expression: "1    +    2    *    3",
+			want:       "1 + 2 * 3",
+		},
+		{
+			name:       "expression with tabs and newlines",
+			expression: "1\t+\n2",
+			want:       "1 + 2",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			args := []js.Value{js.ValueOf(tt.expression)}
+			result := format(js.Value{}, args)
+
+			if got := result.(js.Value).String(); got != tt.want {
+				t.Errorf("format(%q) = %q, want %q", tt.expression, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFormatWithOptions(t *testing.T) {
+	tests := []struct {
+		name       string
+		expression string
+		options    map[string]interface{}
+		want       string
+	}{
+		{
+			name:       "default options",
+			expression: "1+2*3",
+			options:    nil,
+			want:       "1 + 2 * 3",
+		},
+		{
+			name:       "no spaces around operators",
+			expression: "1 + 2 * 3",
+			options: map[string]interface{}{
+				"spaceAroundOps": false,
+			},
+			want: "1+2*3",
+		},
+		{
+			name:       "custom indent size",
+			expression: "SUM(1, MAX(2, 3))",
+			options: map[string]interface{}{
+				"indentSize": 4,
+			},
+			want: "SUM(1, MAX(2, 3))",
+		},
+		{
+			name:       "break long expressions",
+			expression: "VERYLONGFUNCTIONNAME(parameter1, parameter2, parameter3, parameter4, parameter5)",
+			options: map[string]interface{}{
+				"breakLongExpressions": true,
+				"maxLineLength":        40,
+			},
+			want: "VERYLONGFUNCTIONNAME(\n  parameter1,\n  parameter2,\n  parameter3,\n  parameter4,\n  parameter5\n)",
+		},
+		{
+			name:       "complex expression with all options",
+			expression: "[column_a]+[column_b]*[column_c]/[column_d]",
+			options: map[string]interface{}{
+				"spaceAroundOps":       false,
+				"breakLongExpressions": false,
+				"indentSize":           2,
+				"maxLineLength":        80,
+			},
+			want: "[column_a]+[column_b]*[column_c]/[column_d]",
+		},
+		{
+			name:       "nested function with line breaking",
+			expression: "IF(condition, COMPLEX_CALCULATION(a, b, c), ANOTHER_CALCULATION(d, e, f))",
+			options: map[string]interface{}{
+				"breakLongExpressions": true,
+				"maxLineLength":        30,
+				"indentSize":           2,
+			},
+			want: "IF(\n  condition,\n  COMPLEX_CALCULATION(\n    a,\n    b,\n    c\n  ),\n  ANOTHER_CALCULATION(\n    d,\n    e,\n    f\n  )\n)",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var optionsValue js.Value
+			if tt.options == nil {
+				optionsValue = js.Null()
+			} else {
+				// Create a JavaScript object from the map
+				obj := js.Global().Get("Object").New()
+				for key, value := range tt.options {
+					obj.Set(key, js.ValueOf(value))
+				}
+				optionsValue = obj
+			}
+
+			args := []js.Value{js.ValueOf(tt.expression), optionsValue}
+			result := formatWithOptions(js.Value{}, args)
+
+			if got := result.(js.Value).String(); got != tt.want {
+				t.Errorf("formatWithOptions(%q, %v) = %q, want %q", tt.expression, tt.options, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFormatInvalidArguments(t *testing.T) {
+	t.Run("format with no arguments", func(t *testing.T) {
+		args := []js.Value{}
+		result := format(js.Value{}, args)
+
+		if got := result.(js.Value).String(); got != "" {
+			t.Errorf("format() with no args = %q, want empty string", got)
+		}
+	})
+
+	t.Run("format with multiple arguments", func(t *testing.T) {
+		args := []js.Value{js.ValueOf("1+2"), js.ValueOf("extra")}
+		result := format(js.Value{}, args)
+
+		// Should still work with just the first argument
+		if got := result.(js.Value).String(); got != "1 + 2" {
+			t.Errorf("format() with extra args = %q, want '1 + 2'", got)
+		}
+	})
+
+	t.Run("formatWithOptions with no arguments", func(t *testing.T) {
+		args := []js.Value{}
+		result := formatWithOptions(js.Value{}, args)
+
+		if got := result.(js.Value).String(); got != "" {
+			t.Errorf("formatWithOptions() with no args = %q, want empty string", got)
+		}
+	})
+
+	t.Run("formatWithOptions with one argument", func(t *testing.T) {
+		args := []js.Value{js.ValueOf("1+2")}
+		result := formatWithOptions(js.Value{}, args)
+
+		if got := result.(js.Value).String(); got != "" {
+			t.Errorf("formatWithOptions() with one arg = %q, want empty string", got)
+		}
+	})
+
+	t.Run("formatWithOptions with undefined options", func(t *testing.T) {
+		args := []js.Value{js.ValueOf("1+2"), js.Undefined()}
+		result := formatWithOptions(js.Value{}, args)
+
+		// Should use default options
+		if got := result.(js.Value).String(); got != "1 + 2" {
+			t.Errorf("formatWithOptions() with undefined options = %q, want '1 + 2'", got)
+		}
+	})
 }
 
 func TestInvalidArguments(t *testing.T) {

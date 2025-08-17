@@ -13,9 +13,6 @@ type FormatOptions struct {
 
 	// BreakLongExpressions automatically breaks long expressions
 	BreakLongExpressions bool
-
-	// AlignOperators vertically aligns operators in multi-line expressions (future feature)
-	AlignOperators bool
 }
 
 // DefaultFormatOptions returns the default formatting options
@@ -25,7 +22,6 @@ func DefaultFormatOptions() *FormatOptions {
 		MaxLineLength:        40,
 		SpaceAroundOps:       true,
 		BreakLongExpressions: true,
-		AlignOperators:       false,
 	}
 }
 
@@ -54,12 +50,5 @@ func (o *FormatOptions) WithSpaceAroundOps(enabled bool) *FormatOptions {
 func (o *FormatOptions) WithBreakLongExpressions(enabled bool) *FormatOptions {
 	copy := *o
 	copy.BreakLongExpressions = enabled
-	return &copy
-}
-
-// WithAlignOperators returns a copy of options with the specified align operators setting
-func (o *FormatOptions) WithAlignOperators(enabled bool) *FormatOptions {
-	copy := *o
-	copy.AlignOperators = enabled
 	return &copy
 }

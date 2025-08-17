@@ -26,20 +26,22 @@ func newFormatterContext(options *FormatOptions) *FormatterContext {
 	}
 }
 
-func (ctx *FormatterContext) enterExpression() {
-	ctx.depth++
-}
-
-func (ctx *FormatterContext) exitExpression() {
-	if ctx.depth > 0 {
-		ctx.depth--
-	}
-}
-
 // write writes a string to the output buffer
 func (ctx *FormatterContext) write(s string) {
 	ctx.builder.WriteString(s)
 	ctx.column += len(s)
+}
+
+// decreaseIndent decreases the indentation level
+func (ctx *FormatterContext) decreaseIndent() {
+	if ctx.indent > 0 {
+		ctx.indent--
+	}
+}
+
+// increaseIndent increases the indentation level
+func (ctx *FormatterContext) increaseIndent() {
+	ctx.indent++
 }
 
 // writeIndent writes the current indentation
@@ -63,16 +65,21 @@ func (ctx *FormatterContext) writeNewlineWithIndent() {
 	ctx.writeIndent()
 }
 
-// decreaseIndent decreases the indentation level
-func (ctx *FormatterContext) decreaseIndent() {
-	if ctx.indent > 0 {
-		ctx.indent--
+// writeSpaceAroundOperators writes a space if SpaceAroundOps is enabled
+func (ctx *FormatterContext) writeSpaceAroundOperators() {
+	if ctx.options.SpaceAroundOps {
+		ctx.write(" ")
 	}
 }
 
-// increaseIndent increases the indentation level
-func (ctx *FormatterContext) increaseIndent() {
-	ctx.indent++
+func (ctx *FormatterContext) enterExpression() {
+	ctx.depth++
+}
+
+func (ctx *FormatterContext) exitExpression() {
+	if ctx.depth > 0 {
+		ctx.depth--
+	}
 }
 
 // enterFunction marks that we're entering a function call
@@ -92,13 +99,6 @@ func (ctx *FormatterContext) exitFunction() {
 // isNestedFunction returns true if we're inside a nested function call
 func (ctx *FormatterContext) isNestedFunction() bool {
 	return ctx.functionNestLevel > 1
-}
-
-// writeSpaceAroundOperators writes a space if SpaceAroundOps is enabled
-func (ctx *FormatterContext) writeSpaceAroundOperators() {
-	if ctx.options.SpaceAroundOps {
-		ctx.write(" ")
-	}
 }
 
 // finalize finalizes the formatting and returns the result
