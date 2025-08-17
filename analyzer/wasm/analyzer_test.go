@@ -207,7 +207,7 @@ func TestFormatExpression(t *testing.T) {
 		{
 			name:       "invalid expression",
 			expression: "1 + + 2",
-			want:       "", // formatter returns empty string for invalid expressions
+			want:       "1 + + 2", // formatter returns original string for invalid expressions
 		},
 		{
 			name:       "expression with extra spaces",

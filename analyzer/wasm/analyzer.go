@@ -49,7 +49,7 @@ func analyze(this js.Value, args []js.Value) any {
 
 // format function exposed to JavaScript
 func format(this js.Value, args []js.Value) any {
-	if len(args) != 1 {
+	if len(args) < 1 {
 		return js.ValueOf("")
 	}
 
@@ -61,7 +61,7 @@ func format(this js.Value, args []js.Value) any {
 
 // formatWithOptions function exposed to JavaScript
 func formatWithOptions(this js.Value, args []js.Value) any {
-	if len(args) != 2 {
+	if len(args) < 2 {
 		return js.ValueOf("")
 	}
 

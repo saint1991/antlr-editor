@@ -54,7 +54,6 @@ func (ctx *FormatterContext) writeIndent() {
 func (ctx *FormatterContext) writeNewline() {
 	ctx.builder.WriteString("\n")
 	ctx.column = 0
-	ctx.writeIndent()
 }
 
 // writeNewlineWithIndent writes a newline and increases indentation

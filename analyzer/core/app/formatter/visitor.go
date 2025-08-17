@@ -140,9 +140,7 @@ func (v *FormatVisitor) VisitFunctionCall(ctx *parser.FunctionCallContext) any {
 
 		if shouldBreakArgs {
 			// Multi-line format
-			v.ctx.writeNewlineWithIndent()
 			v.visitArgumentListMultiLine(expressions)
-			v.ctx.decreaseIndent()
 			v.ctx.writeNewline()
 		} else {
 			// Single-line format
@@ -170,13 +168,17 @@ func (v *FormatVisitor) VisitArgumentList(ctx *parser.ArgumentListContext) any {
 
 // visitArgumentListMultiLine formats arguments in multi-line style
 func (v *FormatVisitor) visitArgumentListMultiLine(expressions []parser.IExpressionContext) {
+	v.ctx.writeNewline()
+	v.ctx.increaseIndent()
 	for i, expr := range expressions {
 		if i > 0 {
 			v.ctx.write(",")
 			v.ctx.writeNewline()
 		}
+		v.ctx.writeIndent()
 		v.Visit(expr)
 	}
+	v.ctx.decreaseIndent()
 }
 
 type HasExpressionContext interface {
