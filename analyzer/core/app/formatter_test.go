@@ -90,14 +90,9 @@ func TestFormatter_FunctionCalls_SingleLine(t *testing.T) {
 			expected: "FUNC([a], [b], [c])",
 		},
 		{
-			name:  "function with mixed argument types",
-			input: "FUNC([column1],[column2],123,\"text\")",
-			expected: `FUNC(
-  [column1],
-  [column2],
-  123,
-  "text"
-)`,
+			name:     "function with mixed argument types",
+			input:    "FUNC([column1],[column2],123,\"text\")",
+			expected: `FUNC([column1], [column2], 123, "text")`,
 		},
 		{
 			name:     "no space before parenthesis",
@@ -187,7 +182,11 @@ func TestFormatter_FunctionCalls_MultiLine(t *testing.T) {
 			options: shortLineOpts,
 			expected: `CALC(
   SUM([sales], [tax]),
-  AVG([price], [discount], [quantity]),
+  AVG(
+    [price],
+    [discount],
+    [quantity]
+  ),
   FILTER([region], "APAC")
 )`,
 		},
@@ -196,8 +195,14 @@ func TestFormatter_FunctionCalls_MultiLine(t *testing.T) {
 			input:   "CALC(SUM(MIN([a],[b]),MIN([c],[d])),MAX(MIN([e],[f]),MIN([g],[h])),[i])",
 			options: shortLineOpts,
 			expected: `CALC(
-  SUM(MIN([a], [b]), MIN([c], [d])),
-  MAX(MIN([e], [f]), MIN([g], [h])),
+  SUM(
+    MIN([a], [b]),
+    MIN([c], [d])
+  ),
+  MAX(
+    MIN([e], [f]),
+    MIN([g], [h])
+  ),
   [i]
 )`,
 		},
@@ -528,11 +533,7 @@ func TestFormatter_ConfigurationOptions(t *testing.T) {
 				SpaceAroundOps:       true,
 				BreakLongExpressions: true,
 			},
-			expected: `FUNC(
-    [a],
-    [b],
-    [c]
-)`,
+			expected: `FUNC([a], [b], [c])`,
 		},
 		{
 			name:  "no space around operators",

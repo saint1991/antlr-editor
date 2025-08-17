@@ -87,7 +87,7 @@ analyzer/
 
 ## Key Dependencies
 
-- Go 1.24.4 or higher
+- Go 1.24.6 or higher
 - ANTLR4 Go Runtime v4.13.1
 - Docker (for parser generation)
 

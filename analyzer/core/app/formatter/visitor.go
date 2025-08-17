@@ -129,17 +129,17 @@ func (v *FormatVisitor) VisitFunctionCall(ctx *parser.FunctionCallContext) any {
 
 		// Determine if we should use multi-line format
 		// Add the current column position to the total estimated length
-		functionCallLength := len(functionName) + 2 + totalArgLength // name + "()" + args
-		currentLineWouldBe := v.ctx.column + functionCallLength
+		functionCallLength := 1 + totalArgLength                // ")" + args
+		currentLineWouldBe := v.ctx.column + functionCallLength // indent + function name + "()" + args
 
 		// Nested functions should not be multi-line if parent is already multi-line
 		shouldBreakArgs := v.ctx.options.BreakLongExpressions &&
 			currentLineWouldBe > v.ctx.options.MaxLineLength &&
-			len(expressions) > 1 &&
-			!v.ctx.isNestedFunction()
+			len(expressions) > 1
 
 		if shouldBreakArgs {
 			// Multi-line format
+			v.ctx.writeNewlineWithIndent()
 			v.visitArgumentListMultiLine(expressions)
 			v.ctx.writeNewline()
 		} else {
@@ -168,14 +168,11 @@ func (v *FormatVisitor) VisitArgumentList(ctx *parser.ArgumentListContext) any {
 
 // visitArgumentListMultiLine formats arguments in multi-line style
 func (v *FormatVisitor) visitArgumentListMultiLine(expressions []parser.IExpressionContext) {
-	v.ctx.writeNewline()
-	v.ctx.increaseIndent()
 	for i, expr := range expressions {
 		if i > 0 {
 			v.ctx.write(",")
 			v.ctx.writeNewline()
 		}
-		v.ctx.writeIndent()
 		v.Visit(expr)
 	}
 	v.ctx.decreaseIndent()

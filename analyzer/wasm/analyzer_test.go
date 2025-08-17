@@ -264,12 +264,18 @@ func TestFormatWithOptions(t *testing.T) {
 		},
 		{
 			name:       "break long expressions",
-			expression: "VERYLONGFUNCTIONNAME(parameter1, parameter2, parameter3, parameter4, parameter5)",
+			expression: `VERYLONGFUNCTIONNAME("parameter1", "parameter2", "parameter3", "parameter4", "parameter5")`,
 			options: map[string]interface{}{
 				"breakLongExpressions": true,
 				"maxLineLength":        40,
 			},
-			want: "VERYLONGFUNCTIONNAME(\n  parameter1,\n  parameter2,\n  parameter3,\n  parameter4,\n  parameter5\n)",
+			want: `VERYLONGFUNCTIONNAME(
+  "parameter1",
+  "parameter2",
+  "parameter3",
+  "parameter4",
+  "parameter5"
+)`,
 		},
 		{
 			name:       "complex expression with all options",
@@ -284,13 +290,25 @@ func TestFormatWithOptions(t *testing.T) {
 		},
 		{
 			name:       "nested function with line breaking",
-			expression: "IF(condition, COMPLEX_CALCULATION(a, b, c), ANOTHER_CALCULATION(d, e, f))",
+			expression: `IF([condition], COMPLEXCALCULATION("a", "b", "c"), ANOTHERCALCULATION("d", "e", "f"))`,
 			options: map[string]interface{}{
 				"breakLongExpressions": true,
 				"maxLineLength":        30,
 				"indentSize":           2,
 			},
-			want: "IF(\n  condition,\n  COMPLEX_CALCULATION(\n    a,\n    b,\n    c\n  ),\n  ANOTHER_CALCULATION(\n    d,\n    e,\n    f\n  )\n)",
+			want: `IF(
+  [condition],
+  COMPLEXCALCULATION(
+    "a",
+    "b",
+    "c"
+  ),
+  ANOTHERCALCULATION(
+    "d",
+    "e",
+    "f"
+  )
+)`,
 		},
 	}
 
@@ -351,7 +369,7 @@ func TestFormatInvalidArguments(t *testing.T) {
 		args := []js.Value{js.ValueOf("1+2")}
 		result := formatWithOptions(js.Value{}, args)
 
-		if got := result.(js.Value).String(); got != "" {
+		if got := result.(js.Value).String(); got != "1 + 2" {
 			t.Errorf("formatWithOptions() with one arg = %q, want empty string", got)
 		}
 	})

@@ -3,6 +3,7 @@ package app
 import (
 	"antlr-editor/analyzer/core/app/formatter"
 	"antlr-editor/analyzer/core/infrastructure"
+	"antlr-editor/analyzer/core/models"
 )
 
 // Formatter provides expression formatting functionality
@@ -30,16 +31,19 @@ func (f *Formatter) Format(expression string) string {
 		return ""
 	}
 
-	// First, validate the expression using the analyzer
-	analyzer := newAnalyzer()
-	if !analyzer.Validate(expression) {
-		// Return original expression if it's invalid
-		return expression
-	}
-
 	// Parse the expression
 	ctx := f.helper.CreateParser(expression)
+
+	errors := make([]models.ErrorInfo, 0)
+	errorListener := infrastructure.NewCollectingErrorListener(&errors)
+	f.helper.SetupErrorListeners(ctx, errorListener)
+
 	tree := f.helper.ParseExpression(ctx)
+
+	if hasError := (len(errors) > 0 || !f.helper.IsAllTokensConsumed(ctx)); hasError {
+		// If there are parsing errors, return the original expression
+		return expression
+	}
 
 	// Create and use the format visitor
 	visitor := formatter.NewFormatterVisitor(f.options)

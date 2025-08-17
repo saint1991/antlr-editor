@@ -2,7 +2,7 @@ module antlr-editor/analyzer
 
 go 1.24
 
-toolchain go1.24.5
+toolchain go1.24.6
 
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.1

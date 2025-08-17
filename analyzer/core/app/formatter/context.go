@@ -54,6 +54,7 @@ func (ctx *FormatterContext) writeIndent() {
 func (ctx *FormatterContext) writeNewline() {
 	ctx.builder.WriteString("\n")
 	ctx.column = 0
+	ctx.writeIndent()
 }
 
 // writeNewlineWithIndent writes a newline and increases indentation
@@ -93,11 +94,6 @@ func (ctx *FormatterContext) exitFunction() {
 		ctx.functionNestLevel--
 	}
 	ctx.inFunction = ctx.functionNestLevel > 0
-}
-
-// isNestedFunction returns true if we're inside a nested function call
-func (ctx *FormatterContext) isNestedFunction() bool {
-	return ctx.functionNestLevel > 1
 }
 
 // finalize finalizes the formatting and returns the result
