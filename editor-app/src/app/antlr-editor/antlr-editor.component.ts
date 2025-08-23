@@ -1,17 +1,17 @@
-import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
-import { EditorView, basicSetup } from 'codemirror';
-import { Extension } from '@codemirror/state';
-import { indentWithTab } from '@codemirror/commands';
-import { keymap } from '@codemirror/view';
-import { indentUnit, bracketMatching } from '@codemirror/language';
+import { type AfterViewInit, Component, type ElementRef, EventEmitter, Input, type OnInit, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { indentWithTab } from '@codemirror/commands';
+import { bracketMatching, indentUnit } from '@codemirror/language';
+import type { Extension } from '@codemirror/state';
+import { keymap } from '@codemirror/view';
+import { basicSetup, EditorView } from 'codemirror';
 
 @Component({
   selector: 'antlr-editor',
   standalone: true,
   imports: [FormsModule],
   templateUrl: './antlr-editor.html',
-  styleUrls: ['./antlr-editor.css']
+  styleUrls: ['./antlr-editor.css'],
 })
 export class AntlrEditorComponent implements OnInit, AfterViewInit {
   @ViewChild('editor', { static: true }) editorElement!: ElementRef<HTMLDivElement>;
@@ -21,9 +21,7 @@ export class AntlrEditorComponent implements OnInit, AfterViewInit {
 
   private editorView!: EditorView;
 
-  ngOnInit() {
-
-  }
+  ngOnInit() {}
 
   ngAfterViewInit() {
     this.initializeEditor();
@@ -40,13 +38,13 @@ export class AntlrEditorComponent implements OnInit, AfterViewInit {
           const value = update.state.doc.toString();
           this.valueChange.emit(value);
         }
-      })
+      }),
     ];
 
     this.editorView = new EditorView({
       doc: this.initialValue,
       parent: this.editorElement.nativeElement,
-      extensions: extensions
+      extensions: extensions,
     });
   }
 
@@ -59,8 +57,8 @@ export class AntlrEditorComponent implements OnInit, AfterViewInit {
       changes: {
         from: 0,
         to: this.editorView.state.doc.length,
-        insert: value
-      }
+        insert: value,
+      },
     });
     this.editorView.dispatch(transaction);
   }

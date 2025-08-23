@@ -1,4 +1,4 @@
-import { type AnalyzeResult, type FormatOptions } from '../../../../types/analyzer';
+import type { AnalyzeResult, FormatOptions } from '../../../../types/analyzer';
 
 const wasmModuleUrl = '/analyzer.wasm';
 
@@ -9,8 +9,7 @@ export interface Analyzer {
   formatExpressionWithOptions(expression: string, options: FormatOptions): string;
 }
 
-
-let instance: Analyzer | null = null;
+const instance: Analyzer | null = null;
 
 export const loadAnalyzer = async (): Promise<Analyzer> => {
   if (instance) {
@@ -18,14 +17,14 @@ export const loadAnalyzer = async (): Promise<Analyzer> => {
   }
 
   const go = new Go();
-  await WebAssembly.instantiateStreaming(fetch(wasmModuleUrl), go.importObject).then(result => {
-    go.run(result.instance)
+  await WebAssembly.instantiateStreaming(fetch(wasmModuleUrl), go.importObject).then((result) => {
+    go.run(result.instance);
   });
 
   return {
     validateExpression: window.validateExpression,
     analyzeExpression: window.analyzeExpression,
     formatExpression: window.formatExpression,
-    formatExpressionWithOptions: window.formatExpressionWithOptions
-  }
+    formatExpressionWithOptions: window.formatExpressionWithOptions,
+  };
 };
