@@ -20,11 +20,13 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "anthropic.claude-code",
         "golang.go",
         "antlr.antlr4",
         "editorconfig.editorconfig",
         "ms-azuretools.vscode-docker",
-        "ms-playwright.playwright"
+        "ms-playwright.playwright",
+        "angular.ng-template"
       ],
       "settings": {
         "go.useLanguageServer": true,

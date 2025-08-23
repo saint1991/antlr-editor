@@ -14,7 +14,8 @@
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
     "check": "biome check .",
-    "check:fix": "biome check --write ."
+    "check:fix": "biome check --write .",
+    "prepare": "husky"
   },
   "prettier": {
     "printWidth": 100,
@@ -55,12 +56,18 @@
     "@angular/compiler-cli": "^20.1.0",
     "@biomejs/biome": "^2.2.0",
     "@types/jasmine": "~5.1.0",
+    "husky": "^9.1.7",
     "jasmine-core": "~5.9.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "lint-staged": "^16.1.5",
     "typescript": "~5.9.2"
+  },
+  "lint-staged": {
+    "*.{ts,html,json}": "npx biome check --write --no-errors-on-unmatched",
+    "*.css": "npx biome format --write --no-errors-on-unmatched"
   }
 }
