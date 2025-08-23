@@ -20,7 +20,7 @@ func (app *App) Validate(expression string) bool {
 	return app.analyzer.Validate(expression)
 }
 
-func (app *App) Analyze(expression string) *AnalysisResult {
+func (app *App) Analyze(expression string) *TokenizeResult {
 	return app.analyzer.Analyze(expression)
 }
 

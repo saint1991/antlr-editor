@@ -16,7 +16,7 @@ analyzer/ffi/python/
 │       └── models/         # Data models
 │           ├── __init__.py
 │           ├── error.py    # ErrorInfo model
-│           ├── result.py   # AnalysisResult model
+│           ├── result.py   # TokenizeResult model
 │           └── token.py    # TokenInfo and TokenType models
 └── examples/
     └── example.py     # Usage examples
@@ -64,8 +64,8 @@ expression = "user.age > 18 AND user.name = 'John'"
 is_valid = analyzer.validate(expression)
 print(f"Expression is valid: {is_valid}")
 
-# Analyze expression for detailed information
-result = analyzer.analyze(expression)
+# Tokenize expression for detailed information
+result = analyzer.tokenize(expression)
 
 # Check if valid
 if result.is_valid:

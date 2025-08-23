@@ -63,7 +63,7 @@ func TestValidateExpression(t *testing.T) {
 	}
 }
 
-func TestAnalyzeExpression(t *testing.T) {
+func TestTokenizeExpression(t *testing.T) {
 	tests := []struct {
 		name        string
 		expression  string
@@ -104,7 +104,7 @@ func TestAnalyzeExpression(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			args := []js.Value{js.ValueOf(tt.expression)}
-			result := analyze(js.Value{}, args)
+			result := tokenize(js.Value{}, args)
 
 			resultMap := result.(js.Value)
 			tokens := resultMap.Get("tokens")
@@ -114,11 +114,11 @@ func TestAnalyzeExpression(t *testing.T) {
 			errorLength := errors.Length()
 
 			if tt.checkTokens && tokenLength != tt.wantTokens {
-				t.Errorf("analyze(%q) returned %d tokens, want %d", tt.expression, tokenLength, tt.wantTokens)
+				t.Errorf("tokenize(%q) returned %d tokens, want %d", tt.expression, tokenLength, tt.wantTokens)
 			}
 
 			if errorLength != tt.wantErrors {
-				t.Errorf("analyze(%q) returned %d errors, want %d", tt.expression, errorLength, tt.wantErrors)
+				t.Errorf("tokenize(%q) returned %d errors, want %d", tt.expression, errorLength, tt.wantErrors)
 			}
 
 			// Check token structure for valid expressions
@@ -395,9 +395,9 @@ func TestInvalidArguments(t *testing.T) {
 		}
 	})
 
-	t.Run("analyze with no arguments", func(t *testing.T) {
+	t.Run("tokenize with no arguments", func(t *testing.T) {
 		args := []js.Value{}
-		result := analyze(js.Value{}, args)
+		result := tokenize(js.Value{}, args)
 
 		resultMap := result.(js.Value)
 		errors := resultMap.Get("errors")

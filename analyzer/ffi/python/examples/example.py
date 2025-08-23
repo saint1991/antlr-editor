@@ -32,7 +32,7 @@ def example_analyze(analyzer: Analyzer) -> None:
     print("===== Detailed Analysis =====")
 
     expression = "AND([age] > 18, OR([status] == 'active', [status] == 'premium'))"
-    result = analyzer.analyze(expression)
+    result = analyzer.tokenize(expression)
 
     print(f"Expression: {expression}")
     print(f"Valid: {result.is_valid}")
@@ -57,7 +57,7 @@ def example_error_detection(analyzer: Analyzer) -> None:
     invalid_expression = (
         "AND([age > 18, OR([status] == 'active', [status] == 'premium'))"
     )
-    result = analyzer.analyze(invalid_expression)
+    result = analyzer.tokenize(invalid_expression)
 
     print(f"  Expression: {invalid_expression}")
     print(f"  Valid: {result.is_valid}")

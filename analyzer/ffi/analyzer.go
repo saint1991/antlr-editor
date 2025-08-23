@@ -119,12 +119,12 @@ func ValidateFFIString(expression *C.char) C.int {
 	return 0
 }
 
-func analyze(expression string) *C.CAnalysisResult {
+func tokenize(expression string) *C.CTokenizeResult {
 	// Get analysis result
 	result := analyzer.Analyze(expression)
 
 	// Allocate C struct
-	cResult := (*C.CAnalysisResult)(C.malloc(C.sizeof_CAnalysisResult))
+	cResult := (*C.CTokenizeResult)(C.malloc(C.sizeof_CTokenizeResult))
 	if cResult == nil {
 		return nil
 	}
@@ -162,11 +162,11 @@ func analyze(expression string) *C.CAnalysisResult {
 	return cResult
 }
 
-// AnalyzeFFI analyzes expression and returns AnalysisResult struct
-// The caller is responsible for freeing the returned struct using FreeAnalysisResult
+// TokenizeFFI tokenizes expression and returns TokenizeResult struct
+// The caller is responsible for freeing the returned struct using FreeTokenizeResult
 //
-//export AnalyzeFFI
-func AnalyzeFFI(expression *C.char, length C.int) *C.CAnalysisResult {
+//export TokenizeFFI
+func TokenizeFFI(expression *C.char, length C.int) *C.CTokenizeResult {
 	if expression == nil {
 		return nil
 	}
@@ -174,15 +174,15 @@ func AnalyzeFFI(expression *C.char, length C.int) *C.CAnalysisResult {
 	// Convert C string to Go string
 	expressionStr := C.GoStringN(expression, length)
 
-	return analyze(expressionStr)
+	return tokenize(expressionStr)
 }
 
-// AnalyzeFFIString analyzes a null-terminated C string expression
-// and returns AnalysisResult struct
-// The caller is responsible for freeing the returned struct using FreeAnalysisResult
+// TokenizeFFIString tokenizes a null-terminated C string expression
+// and returns TokenizeResult struct
+// The caller is responsible for freeing the returned struct using FreeTokenizeResult
 //
-//export AnalyzeFFIString
-func AnalyzeFFIString(expression *C.char) *C.CAnalysisResult {
+//export TokenizeFFIString
+func TokenizeFFIString(expression *C.char) *C.CTokenizeResult {
 	if expression == nil {
 		return nil
 	}
@@ -190,13 +190,13 @@ func AnalyzeFFIString(expression *C.char) *C.CAnalysisResult {
 	// Convert C string to Go string
 	expressionStr := C.GoString(expression)
 
-	return analyze(expressionStr)
+	return tokenize(expressionStr)
 }
 
-// FreeAnalysisResult frees the memory allocated by AnalyzeStructFFI
+// FreeTokenizeResult frees the memory allocated by TokenizeFFI
 //
-//export FreeAnalysisResult
-func FreeAnalysisResult(result *C.CAnalysisResult) {
+//export FreeTokenizeResult
+func FreeTokenizeResult(result *C.CTokenizeResult) {
 	if result == nil {
 		return
 	}

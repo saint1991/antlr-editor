@@ -1,4 +1,4 @@
-import { type Token, type Error, type AnalyzeResult, type FormatOptions } from './analyzer';
+import { type Token, type Error, type TokenizeResult, type FormatOptions } from './analyzer';
 
 declare global {
   // Go WASM runtime class
@@ -16,7 +16,7 @@ declare global {
     readonly Go: typeof Go;
 
     validateExpression(expression: string): boolean;
-    analyzeExpression(expression: string): AnalyzeResult;
+    tokenizeExpression(expression: string): TokenizeResult;
     formatExpression(expression: string): string;
     formatExpressionWithOptions(expression: string, options: FormatOptions): string;
   }

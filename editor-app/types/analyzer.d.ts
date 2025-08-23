@@ -16,7 +16,7 @@ export interface Error {
   readonly end: number;
 }
 
-export interface AnalyzeResult {
+export interface TokenizeResult {
   readonly tokens: Token[];
   readonly errors: Error[];
 }

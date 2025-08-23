@@ -43,7 +43,7 @@ Example usage:
 from antlr_analyzer import Analyzer
 
 analyzer = Analyzer()
-result = analyzer.analyze("age > 18 AND name = 'John'")
+result = analyzer.tokenize("age > 18 AND name = 'John'")
 
 if result.is_valid:
     for token in result.tokens:

@@ -11,6 +11,6 @@ typedef struct {
     int32_t token_count; // Number of tokens
     CErrorInfo* errors;  // Array of errors
     int32_t error_count; // Number of errors
-} CAnalysisResult;
+} CTokenizeResult;
 
 #endif // ANALYZER_H

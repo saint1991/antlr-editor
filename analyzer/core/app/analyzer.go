@@ -8,18 +8,18 @@ import (
 	"antlr-editor/analyzer/gen/parser"
 )
 
-// AnalysisResult contains the complete analysis result
-type AnalysisResult struct {
+// TokenizeResult contains the complete tokenization result
+type TokenizeResult struct {
 	Tokens []models.TokenInfo `json:"tokens"` // List of tokens
 	Errors []models.ErrorInfo `json:"errors"` // List of error information
 }
 
 // IsValid returns true if the expression has no errors
-func (r *AnalysisResult) IsValid() bool {
+func (r *TokenizeResult) IsValid() bool {
 	return len(r.Errors) == 0
 }
 
-func (r *AnalysisResult) AsMap() map[string]any {
+func (r *TokenizeResult) AsMap() map[string]any {
 	tokens := make([]any, len(r.Tokens))
 	for i, token := range r.Tokens {
 		tokens[i] = token.AsMap()
@@ -48,8 +48,8 @@ func newAnalyzer() *Analyzer {
 }
 
 // Analyze performs detailed token analysis of the given expression strin
-func (a *Analyzer) Analyze(expression string) *AnalysisResult {
-	result := &AnalysisResult{
+func (a *Analyzer) Analyze(expression string) *TokenizeResult {
+	result := &TokenizeResult{
 		Tokens: make([]models.TokenInfo, 0),
 		Errors: make([]models.ErrorInfo, 0),
 	}
