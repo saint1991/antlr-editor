@@ -6,6 +6,7 @@
     "start": "ng serve",
     "start:hmr": "ng serve --hmr",
     "build": "ng build",
+    "build:wasm": "cd .. && docker build --target wasm-output --output=type=local,dest=editor-app/public -f analyzer/Dockerfile .",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "clean-cache": "ng cache clean",

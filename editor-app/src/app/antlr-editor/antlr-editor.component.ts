@@ -1,10 +1,12 @@
 import { type AfterViewInit, Component, type ElementRef, EventEmitter, Input, type OnInit, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { indentWithTab } from '@codemirror/commands';
-import { bracketMatching, indentUnit } from '@codemirror/language';
+import { bracketMatching, foldGutter, foldKeymap, indentUnit } from '@codemirror/language';
 import type { Extension } from '@codemirror/state';
-import { keymap } from '@codemirror/view';
+import { keymap, lineNumbers } from '@codemirror/view';
 import { basicSetup, EditorView } from 'codemirror';
+import { loadAnalyzer } from './extensions/analyzer';
+import { expressionLanguage } from './extensions/expression-language';
 
 @Component({
   selector: 'antlr-editor',
@@ -23,16 +25,23 @@ export class AntlrEditorComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {}
 
-  ngAfterViewInit() {
-    this.initializeEditor();
+  async ngAfterViewInit() {
+    await this.initializeEditor();
   }
 
-  private initializeEditor() {
+  private async initializeEditor() {
+    // Load the WASM analyzer
+    const analyzer = await loadAnalyzer();
+
     const extensions: Extension[] = [
       basicSetup,
       keymap.of([indentWithTab]),
       indentUnit.of('  '),
+      expressionLanguage(analyzer), // Add syntax highlighting
       bracketMatching(),
+      lineNumbers(),
+      foldGutter(),
+      keymap.of(foldKeymap),
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {
           const value = update.state.doc.toString();

@@ -1,4 +1,4 @@
-import { type Token, type Error, type TokenizeResult, type FormatOptions } from './analyzer';
+import type { TokenizeResult, FormatOptions } from './analyzer';
 
 declare global {
   // Go WASM runtime class
@@ -21,5 +21,3 @@ declare global {
     formatExpressionWithOptions(expression: string, options: FormatOptions): string;
   }
 }
-
-export {};
