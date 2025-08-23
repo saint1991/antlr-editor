@@ -6,7 +6,7 @@ import ctypes
 import platform
 from pathlib import Path
 
-from .models import TokenType, TokenInfo, ErrorInfo, AnalysisResult
+from .models import TokenType, TokenInfo, ErrorInfo, TokenizeResult
 
 
 # C struct definitions
@@ -36,8 +36,8 @@ class CErrorInfo(ctypes.Structure):
     ]
 
 
-class CAnalysisResult(ctypes.Structure):
-    """C struct for analysis result."""
+class CTokenizeResult(ctypes.Structure):
+    """C struct for tokenize result."""
 
     _fields_ = [
         ("tokens", ctypes.POINTER(CTokenInfo)),
@@ -94,17 +94,17 @@ class Analyzer:
         self._lib.ValidateFFI.argtypes = [ctypes.c_char_p, ctypes.c_int]
         self._lib.ValidateFFI.restype = ctypes.c_int
 
-        # AnalyzeFFI
-        self._lib.AnalyzeFFI.argtypes = [ctypes.c_char_p, ctypes.c_int]
-        self._lib.AnalyzeFFI.restype = ctypes.POINTER(CAnalysisResult)
+        # TokenizeFFI
+        self._lib.TokenizeFFI.argtypes = [ctypes.c_char_p, ctypes.c_int]
+        self._lib.TokenizeFFI.restype = ctypes.POINTER(CTokenizeResult)
 
         # FormatFFI
         self._lib.FormatFFI.argtypes = [ctypes.c_char_p, ctypes.c_int]
         self._lib.FormatFFI.restype = ctypes.c_char_p
 
-        # FreeAnalysisResult
-        self._lib.FreeAnalysisResult.argtypes = [ctypes.POINTER(CAnalysisResult)]
-        self._lib.FreeAnalysisResult.restype = None
+        # FreeTokenizeResult
+        self._lib.FreeTokenizeResult.argtypes = [ctypes.POINTER(CTokenizeResult)]
+        self._lib.FreeTokenizeResult.restype = None
 
         # FreeString
         self._lib.FreeString.argtypes = [ctypes.POINTER(ctypes.c_char)]
@@ -127,24 +127,24 @@ class Analyzer:
         result = self._lib.ValidateFFI(expr_bytes, len(expr_bytes))
         return bool(result)
 
-    def analyze(self, expression: str) -> AnalysisResult:
+    def tokenize(self, expression: str) -> TokenizeResult:
         """
-        Analyze an expression and return detailed information.
+        Tokenize an expression and return detailed information.
 
         Args:
             expression: The expression to analyze.
 
         Returns:
-            AnalysisResult containing tokens and errors.
+            TokenizeResult containing tokens and errors.
         """
         if not expression:
-            return AnalysisResult(tokens=[], errors=[])
+            return TokenizeResult(tokens=[], errors=[])
 
         expr_bytes = expression.encode("utf-8")
-        c_result_ptr = self._lib.AnalyzeFFI(expr_bytes, len(expr_bytes))
+        c_result_ptr = self._lib.TokenizeFFI(expr_bytes, len(expr_bytes))
 
         if not c_result_ptr:
-            return AnalysisResult(tokens=[], errors=[])
+            return TokenizeResult(tokens=[], errors=[])
 
         try:
             c_result = c_result_ptr.contents
@@ -177,10 +177,10 @@ class Analyzer:
                 )
                 errors.append(error)
 
-            return AnalysisResult(tokens=tokens, errors=errors)
+            return TokenizeResult(tokens=tokens, errors=errors)
         finally:
             # Free the C memory
-            self._lib.FreeAnalysisResult(c_result_ptr)
+            self._lib.FreeTokenizeResult(c_result_ptr)
 
     def format(self, expression: str) -> str:
         """

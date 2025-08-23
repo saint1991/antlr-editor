@@ -392,7 +392,7 @@ func TestAnalyzer_JSONSerialization(t *testing.T) {
 	}
 
 	// Test that it can be deserialized back
-	var deserializedResult AnalysisResult
+	var deserializedResult TokenizeResult
 	err = json.Unmarshal(jsonBytes, &deserializedResult)
 	if err != nil {
 		t.Errorf("Failed to deserialize result from JSON: %v", err)
@@ -615,7 +615,7 @@ func TestAnalyzer_ValidationIntegration(t *testing.T) {
 	}
 }
 
-func TestAnalysisResult_IsValid(t *testing.T) {
+func TestTokenizeResult_IsValid(t *testing.T) {
 	tests := []struct {
 		name   string
 		errors []models.ErrorInfo
@@ -645,12 +645,12 @@ func TestAnalysisResult_IsValid(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := &AnalysisResult{
+			result := &TokenizeResult{
 				Tokens: []models.TokenInfo{},
 				Errors: tt.errors,
 			}
 			if got := result.IsValid(); got != tt.want {
-				t.Errorf("AnalysisResult.IsValid() = %v, want %v", got, tt.want)
+				t.Errorf("TokenizeResult.IsValid() = %v, want %v", got, tt.want)
 			}
 		})
 	}

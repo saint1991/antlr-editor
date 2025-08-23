@@ -1,10 +1,10 @@
-import type { AnalyzeResult, FormatOptions } from '../../../../types/analyzer';
+import type { FormatOptions, TokenizeResult } from '../../../../types/analyzer';
 
 const wasmModuleUrl = '/analyzer.wasm';
 
 export interface Analyzer {
   validateExpression(expression: string): boolean;
-  analyzeExpression(expression: string): AnalyzeResult;
+  tokenizeExpression(expression: string): TokenizeResult;
   formatExpression(expression: string): string;
   formatExpressionWithOptions(expression: string, options: FormatOptions): string;
 }
@@ -23,7 +23,7 @@ export const loadAnalyzer = async (): Promise<Analyzer> => {
 
   return {
     validateExpression: window.validateExpression,
-    analyzeExpression: window.analyzeExpression,
+    tokenizeExpression: window.tokenizeExpression,
     formatExpression: window.formatExpression,
     formatExpressionWithOptions: window.formatExpressionWithOptions,
   };

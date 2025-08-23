@@ -24,8 +24,8 @@ func validate(this js.Value, args []js.Value) any {
 	return js.ValueOf(analyzer.Validate(expression))
 }
 
-// analyze function exposed to JavaScript
-func analyze(this js.Value, args []js.Value) any {
+// tokenize function exposed to JavaScript
+func tokenize(this js.Value, args []js.Value) any {
 	if len(args) != 1 {
 		return js.ValueOf(map[string]any{
 			"tokens": []any{},
@@ -94,7 +94,7 @@ func formatWithOptions(this js.Value, args []js.Value) any {
 func main() {
 	// Register functions
 	js.Global().Set("validateExpression", js.FuncOf(validate))
-	js.Global().Set("analyzeExpression", js.FuncOf(analyze))
+	js.Global().Set("tokenizeExpression", js.FuncOf(tokenize))
 	js.Global().Set("formatExpression", js.FuncOf(format))
 	js.Global().Set("formatExpressionWithOptions", js.FuncOf(formatWithOptions))
 

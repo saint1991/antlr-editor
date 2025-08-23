@@ -5,8 +5,8 @@ from .error import ErrorInfo
 
 
 @dataclass(frozen=True)
-class AnalysisResult:
-    """Result of analyzing an expression."""
+class TokenizeResult:
+    """Result of tokenizing an expression."""
 
     tokens: list[TokenInfo]
     errors: list[ErrorInfo]

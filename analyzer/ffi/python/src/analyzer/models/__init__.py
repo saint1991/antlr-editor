@@ -1,5 +1,5 @@
 from .error import ErrorInfo
-from .result import AnalysisResult
+from .result import TokenizeResult
 from .token import TokenInfo, TokenType
 
-__all__ = ["ErrorInfo", "AnalysisResult", "TokenInfo", "TokenType"]
+__all__ = ["ErrorInfo", "TokenizeResult", "TokenInfo", "TokenType"]
