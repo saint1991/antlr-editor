@@ -1,0 +1,11 @@
+<div class="app-container">
+  <main class="app-main">
+    <div class="editor-wrapper">
+      <antlr-editor
+        [initialValue]="initialCode"
+        [theme]="selectedTheme"
+        (valueChange)="handleValueChange($event)"
+      ></antlr-editor>
+    </div>
+  </main>
+</div>
