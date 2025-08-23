@@ -1,0 +1,45 @@
+name: Editor App CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'editor-app/**'
+      - '.github/workflows/editor-app-ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'editor-app/**'
+      - '.github/workflows/editor-app-ci.yml'
+
+jobs:
+  check-and-build:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: editor-app
+
+    strategy:
+      matrix:
+        node-version: [24.x]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: editor-app/package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run Biome check
+      run: npm run check
+
+    - name: Build application
+      run: npm run build
