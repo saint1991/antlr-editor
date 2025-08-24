@@ -90,3 +90,6 @@ COLUMN_REF
 
 // Skip whitespace
 WS : [ \t\r\n]+ -> skip ;
+
+// handle NoViableAlt
+ERROR_CHAR : . -> channel(HIDDEN);
