@@ -99,6 +99,13 @@ func TestTokenizeExpression(t *testing.T) {
 			wantErrors:  1,
 			checkTokens: false,
 		},
+		{
+			name:  "invalid Multibyte characters",
+			expression: "MAX(LEN(\"hello\"), MIN([column1], 42.5)) >= 5 && TRUE || (SUM(1, [column3], 3.14) > 5)あいうえお",
+			wantTokens: 0,
+			wantErrors: 1,
+			checkTokens: false,
+		},
 	}
 
 	for _, tt := range tests {
