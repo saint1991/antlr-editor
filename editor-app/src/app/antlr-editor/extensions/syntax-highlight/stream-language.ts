@@ -1,4 +1,4 @@
-import { HighlightStyle, LanguageSupport, StreamLanguage, syntaxHighlighting } from '@codemirror/language';
+import { HighlightStyle, LanguageSupport, StreamLanguage, type StringStream, syntaxHighlighting } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
 import type { Analyzer, Token, TokenType } from '../analyzer';
 
@@ -20,14 +20,16 @@ const tokenTypeMapping: Record<TokenType, string | null> = {
   eof: null,
 };
 
+interface State {
+  tokens: Token[];
+  errors: Array<{ start: number; end: number }>;
+  currentIndex: number;
+  text: string;
+}
+
 // Create the language definition using StreamLanguage
 export const createExpressionLanguage = (analyzer: Analyzer) => {
-  return StreamLanguage.define<{
-    tokens: Token[];
-    errors: Array<{ start: number; end: number }>;
-    currentIndex: number;
-    text: string;
-  }>({
+  return StreamLanguage.define<State>({
     name: 'expression',
     startState: () => ({
       tokens: [],
@@ -35,7 +37,7 @@ export const createExpressionLanguage = (analyzer: Analyzer) => {
       currentIndex: 0,
       text: '',
     }),
-    token: (stream, state) => {
+    token: (stream: StringStream, state: State) => {
       // If at start of line or text changed, tokenize the entire line
       if (stream.pos === 0 || state.text !== stream.string) {
         state.text = stream.string;
