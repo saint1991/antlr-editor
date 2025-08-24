@@ -60,8 +60,8 @@ COMMA    : ',' ;
 
 // Literals - Order matters for proper tokenization
 BOOLEAN_LITERAL
-    : 'true'
-    | 'false'
+    : [tT][rR][uU][eE]
+    | [fF][aA][lL][sS][eE]
     ;
 
 FLOAT_LITERAL
