@@ -6,7 +6,7 @@ import type { Extension } from '@codemirror/state';
 import { keymap, lineNumbers } from '@codemirror/view';
 import { basicSetup, EditorView } from 'codemirror';
 import { loadAnalyzer } from './extensions/analyzer';
-import { expressionLanguage } from './extensions/expression-language';
+import { expressionLanguage } from './extensions/syntax-highlight/stream-language';
 
 @Component({
   selector: 'antlr-editor',

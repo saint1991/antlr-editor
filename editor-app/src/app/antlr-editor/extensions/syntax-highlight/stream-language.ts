@@ -1,6 +1,6 @@
 import { HighlightStyle, LanguageSupport, StreamLanguage, syntaxHighlighting } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
-import type { Analyzer, Token, TokenType } from './analyzer';
+import type { Analyzer, Token, TokenType } from '../analyzer';
 
 const tokenTypeMapping: Record<TokenType, string | null> = {
   string: 'string',
@@ -8,7 +8,7 @@ const tokenTypeMapping: Record<TokenType, string | null> = {
   float: 'number',
   boolean: 'bool',
   columnReference: 'variableName',
-  function: 'function',
+  function: 'keyword',
   operator: 'operator',
   comma: 'punctuation',
   leftParen: 'paren',
@@ -69,8 +69,7 @@ export const createExpressionLanguage = (analyzer: Analyzer) => {
 export const expressionHighlightStyle = HighlightStyle.define([
   { tag: tags.string, color: '#a31515' }, // Red for strings
   { tag: tags.number, color: '#098658' }, // Green for numbers
-  { tag: tags.keyword, color: '#0000ff' }, // Blue for keywords
-  { tag: tags.function(tags.variableName), color: '#795e26', fontWeight: 'bold' }, // Brown bold for functions
+  { tag: tags.keyword, color: '#795e26', fontWeight: 'bold' }, // Brown bold for function names
   { tag: tags.variableName, color: '#001080' }, // Dark blue for identifiers
   { tag: tags.bracket, color: '#000000' }, // Black for brackets
   { tag: tags.operator, color: '#000000' }, // Black for operators
