@@ -98,7 +98,7 @@ func TestTokenizeExpression(t *testing.T) {
 			wantTokens:  0,
 			wantErrors:  1,
 			checkTokens: false,
-		},
+		}
 	}
 
 	for _, tt := range tests {
