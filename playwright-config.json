@@ -17,5 +17,5 @@
       "timezoneId": "Asia/Tokyo"
     }
   },
-  "outputDir": "./playwright/workspace/out"   
+  "outputDir": "./.playwright/workspace/out"   
 }

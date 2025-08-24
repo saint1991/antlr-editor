@@ -92,8 +92,8 @@ go run ./examples "[column_a] > 5"
 The analyzer can be compiled to WebAssembly for browser usage:
 
 ```bash
-# Build WASM module (from analyzer directory)
-docker build --target wasm-output --output=type=local,dest=dist -f Dockerfile .
+# Build WASM module (from project root)
+docker build --target wasm-output --output=type=local,dest=analyzer/dist -f analyzer/Dockerfile .
 ```
 
 ## FFI Support

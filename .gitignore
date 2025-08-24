@@ -8,3 +8,5 @@ libanalyzer.dylib
 libanalyzer.h
 
 *.egg-info/
+.playwright/
+playwright/

@@ -15,11 +15,11 @@ export class App implements OnInit {
   title = 'Expression Language Editor';
   selectedTheme: 'light' | 'dark' = 'dark';
 
-  initialCode = `[column1] + [column2] * 2`;
+  initialCode = `MAX([value1], MIN([value2], 100))`;
 
   ngOnInit() {}
 
-  protected handleValueChange(_value: string) {
-    console.log('Editor value changed');
+  protected handleValueChange(value: string) {
+    console.debug('value changed:', value);
   }
 }

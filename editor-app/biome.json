@@ -47,7 +47,7 @@
   },
   "files": {
     "experimentalScannerIgnores": ["node_modules", "dist", ".angular", "*.min.js", "*.wasm", "wasm_exec.js", "package-lock.json"],
-    "includes": ["src/**/*.ts", "src/**/*.html", "src/**/*.json", "*.json"]
+    "includes": ["src/**/*.ts", "types/**/*.d.ts", "src/**/*.html", "src/**/*.json", "*.json"]
   },
   "css": {
     "formatter": {

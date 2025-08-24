@@ -1,5 +1,22 @@
+type TokenType =
+  | 'string'
+  | 'integer'
+  | 'float'
+  | 'boolean'
+  | 'columnReference'
+  | 'function'
+  | 'operator'
+  | 'comma'
+  | 'leftParen'
+  | 'rightParen'
+  | 'leftBracket'
+  | 'rightBracket'
+  | 'whitespace'
+  | 'error'
+  | 'eof';
+
 export interface Token {
-  readonly type: string;
+  readonly type: TokenType;
   readonly text: string;
   readonly start: number;
   readonly end: number;

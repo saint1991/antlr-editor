@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="64" fill="#2D2D3F"/>
+  
+  <!-- Code editor window frame -->
+  <rect x="40" y="40" width="432" height="432" rx="24" fill="#1E1E2E"/>
+  
+  <!-- Title bar -->
+  <rect x="40" y="40" width="432" height="60" rx="24" fill="#2D2D3F"/>
+  <rect x="40" y="80" width="432" height="20" fill="#2D2D3F"/>
+  
+  <!-- Window controls -->
+  <circle cx="80" cy="70" r="12" fill="#FF5F56"/>
+  <circle cx="120" cy="70" r="12" fill="#FFBD2E"/>
+  <circle cx="160" cy="70" r="12" fill="#27C93F"/>
+  
+  <!-- Line numbers -->
+  <text x="60" y="140" font-family="monospace" font-size="24" fill="#6B6B7C">1</text>
+  <text x="60" y="180" font-family="monospace" font-size="24" fill="#6B6B7C">2</text>
+  <text x="60" y="220" font-family="monospace" font-size="24" fill="#6B6B7C">3</text>
+  <text x="60" y="260" font-family="monospace" font-size="24" fill="#6B6B7C">4</text>
+  <text x="60" y="300" font-family="monospace" font-size="24" fill="#6B6B7C">5</text>
+  
+  <!-- Code content with syntax highlighting -->
+  <!-- Function -->
+  <text x="100" y="140" font-family="monospace" font-size="28" font-weight="bold" fill="#66D9EF">MAX</text>
+  <text x="160" y="140" font-family="monospace" font-size="28" fill="#F8F8F2">(</text>
+  
+  <!-- Column reference -->
+  <text x="180" y="140" font-family="monospace" font-size="28" fill="#F8F8F2">[</text>
+  <text x="200" y="140" font-family="monospace" font-size="28" fill="#A6E22E">value</text>
+  <text x="280" y="140" font-family="monospace" font-size="28" fill="#F8F8F2">]</text>
+  
+  <!-- Operator -->
+  <text x="320" y="140" font-family="monospace" font-size="28" fill="#F92672">,</text>
+  
+  <!-- Number -->
+  <text x="100" y="180" font-family="monospace" font-size="28" fill="#AE81FF">100</text>
+  <text x="160" y="180" font-family="monospace" font-size="28" fill="#F8F8F2">)</text>
+  
+  <!-- More code lines for visual effect -->
+  <rect x="100" y="210" width="120" height="4" rx="2" fill="#66D9EF" opacity="0.5"/>
+  <rect x="240" y="210" width="80" height="4" rx="2" fill="#A6E22E" opacity="0.5"/>
+  <rect x="340" y="210" width="60" height="4" rx="2" fill="#F92672" opacity="0.5"/>
+  
+  <rect x="100" y="250" width="160" height="4" rx="2" fill="#F8F8F2" opacity="0.3"/>
+  <rect x="280" y="250" width="100" height="4" rx="2" fill="#AE81FF" opacity="0.5"/>
+  
+  <rect x="100" y="290" width="200" height="4" rx="2" fill="#66D9EF" opacity="0.3"/>
+  <rect x="320" y="290" width="80" height="4" rx="2" fill="#F8F8F2" opacity="0.3"/>
+  
+  <!-- Cursor -->
+  <rect x="170" y="175" width="3" height="30" fill="#F8F8F2">
+    <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+</svg>

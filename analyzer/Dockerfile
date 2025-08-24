@@ -63,12 +63,14 @@ RUN tinygo build -o analyzer-tinygo.wasm -target wasm ./wasm/analyzer.go
 
 # Optimize both WASM binaries
 RUN wasm-opt -O3 -o /go/dist/analyzer.wasm analyzer-tinygo.wasm
+RUN cp "$(tinygo env TINYGOROOT)/targets/wasm_exec.js" /go/dist/wasm_exec.js
 
 
 # Export WASM artifact
 FROM scratch AS wasm-output
 
 COPY --from=wasm-builder /go/dist/analyzer.wasm /analyzer.wasm
+COPY --from=wasm-builder /go/dist/wasm_exec.js /wasm_exec.js
 
 
 # FFI build stage for C shared library

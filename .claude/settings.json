@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./codegen.sh:*)",
+      "Bash(GOOS=js GOARCH=wasm go build -o wasm/analyzer.wasm ./wasm/analyzer.go)",
+      "Bash(GOOS=js GOARCH=wasm go test -exec=\"$(go env GOPATH)/bin/wasmbrowsertest\" -v)"
+    ],
+    "deny": []
+  }
+}
