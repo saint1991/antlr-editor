@@ -6,7 +6,8 @@ import type { Extension } from '@codemirror/state';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { keymap, lineNumbers } from '@codemirror/view';
 import { basicSetup, EditorView } from 'codemirror';
-import { loadAnalyzer } from './extensions/analyzer';
+import { type Analyzer, loadAnalyzer } from './extensions/analyzer';
+import { formatExpression, formatKeymap } from './extensions/formatter';
 import { expressionLanguage } from './extensions/syntax-highlight/stream-language';
 
 @Component({
@@ -23,6 +24,7 @@ export class AntlrEditorComponent implements OnInit, AfterViewInit {
   @Output() valueChange = new EventEmitter<string>();
 
   private editorView!: EditorView;
+  private analyzer!: Analyzer;
 
   ngOnInit() {}
 
@@ -32,17 +34,18 @@ export class AntlrEditorComponent implements OnInit, AfterViewInit {
 
   private async initializeEditor() {
     // Load the WASM analyzer
-    const analyzer = await loadAnalyzer();
+    this.analyzer = await loadAnalyzer();
 
     const extensions: Extension[] = [
       basicSetup,
       keymap.of([indentWithTab]),
       indentUnit.of('  '),
-      expressionLanguage(analyzer, this.theme), // Add syntax highlighting with theme
+      expressionLanguage(this.analyzer, this.theme), // Add syntax highlighting with theme
       bracketMatching(),
       lineNumbers(),
       foldGutter(),
       keymap.of(foldKeymap),
+      formatKeymap(this.analyzer), // Add format keyboard shortcuts
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {
           const value = update.state.doc.toString();
@@ -76,5 +79,10 @@ export class AntlrEditorComponent implements OnInit, AfterViewInit {
       },
     });
     this.editorView.dispatch(transaction);
+  }
+
+  formatCode() {
+    const formatCommand = formatExpression(this.analyzer);
+    formatCommand(this.editorView);
   }
 }
