@@ -24,12 +24,14 @@ const tokenTypeMapping: Record<TokenType, string | null> = {
 export const createExpressionLanguage = (analyzer: Analyzer) => {
   return StreamLanguage.define<{
     tokens: Token[];
+    errors: Array<{ start: number; end: number }>;
     currentIndex: number;
     text: string;
   }>({
     name: 'expression',
     startState: () => ({
       tokens: [],
+      errors: [],
       currentIndex: 0,
       text: '',
     }),
@@ -39,6 +41,7 @@ export const createExpressionLanguage = (analyzer: Analyzer) => {
         state.text = stream.string;
         const result = analyzer.tokenizeExpression(stream.string);
         state.tokens = result.tokens;
+        state.errors = result.errors || [];
         state.currentIndex = 0;
       }
 
@@ -47,8 +50,18 @@ export const createExpressionLanguage = (analyzer: Analyzer) => {
         return null;
       }
 
-      // Find token at current position
       const pos = stream.pos;
+
+      // Check if current position is within an error range
+      for (const error of state.errors) {
+        if (pos >= error.start && pos < error.end) {
+          // Move stream position forward by one character within error range
+          stream.next();
+          return 'invalid';
+        }
+      }
+
+      // Find token at current position
       for (const token of state.tokens) {
         if (token.start === pos) {
           // Move stream position to end of token
@@ -74,6 +87,7 @@ export const expressionHighlightStyle = HighlightStyle.define([
   { tag: tags.bracket, color: '#000000' }, // Black for brackets
   { tag: tags.operator, color: '#000000' }, // Black for operators
   { tag: tags.punctuation, color: '#000000' }, // Black for punctuation
+  { tag: tags.invalid, color: '#ff0000', textDecoration: 'underline wavy' }, // Red with wavy underline for errors
 ]);
 
 // Create the complete language support extension

@@ -15,7 +15,7 @@ export class App implements OnInit {
   title = 'Expression Language Editor';
   selectedTheme: 'light' | 'dark' = 'dark';
 
-  initialCode = `MAX([value1], MIN([value2], 100))`;
+  initialCode = `MAX("hello", MIN([column1], 42.5)) + TRUE AND [column2] >= 100, SUM(1, 2, 3.14)`;
 
   ngOnInit() {}
 
