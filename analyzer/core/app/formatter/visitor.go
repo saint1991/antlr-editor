@@ -71,11 +71,9 @@ func (v *FormatVisitor) VisitColumnRefExpr(ctx *parser.ColumnRefExprContext) any
 
 // VisitColumnReference formats a column reference
 func (v *FormatVisitor) VisitColumnReference(ctx *parser.ColumnReferenceContext) any {
-	v.ctx.write("[")
-	if ctx.IDENTIFIER() != nil {
-		v.ctx.write(ctx.IDENTIFIER().GetText())
+	if ctx.COLUMN_REF() != nil {
+		v.ctx.write(ctx.COLUMN_REF().GetText())
 	}
-	v.ctx.write("]")
 	return nil
 }
 

@@ -138,19 +138,49 @@ func (a *Analyzer) collectTokens(expression string, lexer *parser.ExpressionLexe
 			break
 		}
 
-		tokenInfo := models.TokenInfo{
-			Text:    token.GetText(),
-			Start:   token.GetStart(),
-			End:     token.GetStop() + 1,
-			Line:    token.GetLine(),
-			Column:  token.GetColumn(),
-			IsValid: true,
-		}
-
 		// Determine token type based on token type from lexer
-		tokenInfo.Type = a.getTokenType(token.GetTokenType())
-
-		*tokens = append(*tokens, tokenInfo)
+		tokenType := a.getTokenType(token.GetTokenType())
+		if tokenType == models.TokenColumnReference {
+			leftBracket := models.TokenInfo{
+				Type:    models.TokenLeftBracket,
+				Text:    "[",
+				Start:   token.GetStart(),
+				End:     token.GetStart() + 1,
+				Line:    token.GetLine(),
+				Column:  token.GetColumn(),
+				IsValid: true,
+			}
+			identifier := models.TokenInfo{
+				Type:    models.TokenColumnReference,
+				Text:    token.GetText()[1 : len(token.GetText())-1],
+				Start:   token.GetStart() + 1,
+				End:     token.GetStop(),
+				Line:    token.GetLine(),
+				Column:  token.GetColumn() + 1,
+				IsValid: true,
+			}
+			rightBracket := models.TokenInfo{
+				Type:    models.TokenRightBracket,
+				Text:    "]",
+				Start:   token.GetStop(),
+				End:     token.GetStop() + 1,
+				Line:    token.GetLine(),
+				Column:  token.GetColumn() + 1 + len(identifier.Text),
+				IsValid: true,
+			}
+			*tokens = append(*tokens, leftBracket, identifier, rightBracket)
+		} else {
+			tokenInfo := models.TokenInfo{
+				Type:    tokenType,
+				Text:    token.GetText(),
+				Start:   token.GetStart(),
+				End:     token.GetStop() + 1,
+				Line:    token.GetLine(),
+				Column:  token.GetColumn(),
+				IsValid: true,
+			}
+			*tokens = append(*tokens, tokenInfo)
+		}
 	}
 
 	// Also collect whitespace tokens by analyzing the original string
@@ -168,7 +198,7 @@ func (a *Analyzer) getTokenType(antlrTokenType int) models.TokenType {
 		return models.TokenFloat
 	case parser.ExpressionLexerBOOLEAN_LITERAL:
 		return models.TokenBoolean
-	case parser.ExpressionLexerIDENTIFIER:
+	case parser.ExpressionLexerCOLUMN_REF:
 		return models.TokenColumnReference
 	case parser.ExpressionLexerFUNCTION_NAME:
 		return models.TokenFunction
@@ -472,7 +502,7 @@ func (v *validationVisitor) VisitLiteral(ctx *parser.LiteralContext) any {
 
 func (v *validationVisitor) VisitColumnReference(ctx *parser.ColumnReferenceContext) any {
 	// Column references are valid if they have a non-empty identifier
-	if ctx.IDENTIFIER() != nil && ctx.IDENTIFIER().GetText() != "" {
+	if ctx.COLUMN_REF() != nil && ctx.COLUMN_REF().GetText() != "" {
 		return true
 	}
 	return false

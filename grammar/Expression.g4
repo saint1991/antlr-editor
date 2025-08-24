@@ -23,7 +23,7 @@ literal
     ;
 
 columnReference
-    : LBRACKET IDENTIFIER RBRACKET
+    : COLUMN_REF
     ;
 
 functionCall
@@ -84,8 +84,8 @@ FUNCTION_NAME
     ;
 
 // Identifiers for column references (letters, digits, underscore)
-IDENTIFIER
-    : [a-zA-Z_][a-zA-Z0-9_]*
+COLUMN_REF
+    : LBRACKET ~[[\] \t\r\n]+ RBRACKET
     ;
 
 // Skip whitespace
