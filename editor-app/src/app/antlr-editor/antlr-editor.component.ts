@@ -3,10 +3,11 @@ import { FormsModule } from '@angular/forms';
 import { indentWithTab } from '@codemirror/commands';
 import { bracketMatching, foldGutter, foldKeymap, indentUnit } from '@codemirror/language';
 import type { Extension } from '@codemirror/state';
+import { oneDark } from '@codemirror/theme-one-dark';
 import { keymap, lineNumbers } from '@codemirror/view';
 import { basicSetup, EditorView } from 'codemirror';
 import { loadAnalyzer } from './extensions/analyzer';
-import { expressionLanguage } from './extensions/expression-language';
+import { expressionLanguage } from './extensions/syntax-highlight/stream-language';
 
 @Component({
   selector: 'antlr-editor',
@@ -37,7 +38,7 @@ export class AntlrEditorComponent implements OnInit, AfterViewInit {
       basicSetup,
       keymap.of([indentWithTab]),
       indentUnit.of('  '),
-      expressionLanguage(analyzer), // Add syntax highlighting
+      expressionLanguage(analyzer, this.theme), // Add syntax highlighting with theme
       bracketMatching(),
       lineNumbers(),
       foldGutter(),
@@ -49,6 +50,11 @@ export class AntlrEditorComponent implements OnInit, AfterViewInit {
         }
       }),
     ];
+
+    // Add dark theme if selected
+    if (this.theme === 'dark') {
+      extensions.push(oneDark);
+    }
 
     this.editorView = new EditorView({
       doc: this.initialValue,
