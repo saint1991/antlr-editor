@@ -27,9 +27,6 @@ stream-language.tsに実装したStreamLanguageベースの実装では、以下
 - 複数行にまたがる式を正しく解析できない。
 - 折りたたみができない。(要件4)
 
-また、以下の不具合のような挙動も確認されている。
-
-- IME入力を確定させると次の操作でその文字が消えてしまう。
 
 ### 既存リソース
 - **WASM Analyzer**: `tokenizeExpression`でトークン情報（type, text, start, end, line, column）を取得可能

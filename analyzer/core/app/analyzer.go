@@ -1,6 +1,8 @@
 package app
 
 import (
+	"sort"
+
 	"github.com/antlr4-go/antlr/v4"
 
 	"antlr-editor/analyzer/core/infrastructure"
@@ -49,37 +51,54 @@ func newAnalyzer() *Analyzer {
 
 // Analyze performs detailed token analysis of the given expression strin
 func (a *Analyzer) Analyze(expression string) *TokenizeResult {
-	result := &TokenizeResult{
-		Tokens: make([]models.TokenInfo, 0),
-		Errors: make([]models.ErrorInfo, 0),
-	}
+
+	errors := make([]models.ErrorInfo, 0)
 
 	if expression == "" {
 		// Empty expressions are invalid - add an error
-		result.Errors = append(result.Errors, models.ErrorInfo{
+		errors = append(errors, models.ErrorInfo{
 			Message: "Empty expression",
 			Line:    1,
 			Column:  0,
 			Start:   0,
 			End:     0,
 		})
-		return result
+		return &TokenizeResult{
+			Tokens: []models.TokenInfo{},
+			Errors: errors,
+		}
 	}
 
-	// Create parser context
-	ctx := a.helper.CreateParser(expression)
-
-	// Add custom error listener to collect detailed error information
-	errorListener := infrastructure.NewCollectingErrorListener(&result.Errors)
-	a.helper.SetupErrorListeners(ctx, errorListener)
-
 	// First, collect all tokens from the lexer (including whitespace)
-	lexer := a.helper.CreateLexerForTokenCollection(expression)
-	a.collectTokens(expression, lexer, &result.Tokens)
+	lexer := a.helper.CreateLexer(expression)
+	tokens := a.collectTokens(expression, lexer)
 
-	// Create a new parser context for parsing
-	ctx = a.helper.CreateParser(expression)
-	errorListener = infrastructure.NewCollectingErrorListener(&result.Errors)
+	// Check for ERROR_CHAR tokens and add errors if they exist
+	for _, token := range tokens {
+		if token.Type == models.TokenError {
+			// Check if an error already exists for this position
+			hasError := false
+			for _, err := range errors {
+				if token.Start >= err.Start && token.Start < err.End {
+					hasError = true
+					break
+				}
+			}
+			if !hasError {
+				errors = append(errors, models.ErrorInfo{
+					Message: "Invalid character sequence: " + token.Text,
+					Line:    token.Line,
+					Column:  token.Column,
+					Start:   token.Start,
+					End:     token.End,
+				})
+			}
+		}
+	}
+
+	// Create parser context for parsing
+	ctx := a.helper.CreateParser(expression)
+	errorListener := infrastructure.NewCollectingErrorListener(&errors)
 	a.helper.SetupErrorListeners(ctx, errorListener)
 
 	// Parse the expression - start with the root rule
@@ -87,26 +106,30 @@ func (a *Analyzer) Analyze(expression string) *TokenizeResult {
 
 	// Check if all tokens were consumed - if not, this is an error
 	if !a.helper.IsAllTokensConsumed(ctx) {
-		result.Errors = append(result.Errors, models.ErrorInfo{
+		currentToken := ctx.Parser.GetCurrentToken()
+		errors = append(errors, models.ErrorInfo{
 			Message: "Unexpected tokens at end of expression",
-			Line:    1,
-			Column:  0,
-			Start:   0,
-			End:     len(expression),
+			Line:    currentToken.GetLine(),
+			Column:  currentToken.GetColumn(),
+			Start:   currentToken.GetStart(),
+			End:     currentToken.GetStop() + 1,
 		})
 	}
 
 	// Perform semantic validation if syntax parsing succeeded
-	if len(result.Errors) == 0 {
-		a.performSemanticValidation(tree, &result.Errors)
+	if len(errors) == 0 {
+		a.performSemanticValidation(tree, &errors)
 	}
 
 	// Note: Validity can be determined by checking if len(result.Errors) == 0
 
 	// Mark tokens as invalid if they are in error regions
-	a.markErrorTokens(&result.Tokens, result.Errors)
+	a.markErrorTokens(&tokens, errors)
 
-	return result
+	return &TokenizeResult{
+		Tokens: tokens,
+		Errors: errors,
+	}
 }
 
 // Validate checks if the given expression string has valid syntax
@@ -120,41 +143,86 @@ func (a *Analyzer) Validate(expression string) bool {
 }
 
 // collectTokens extracts all tokens from the lexer including whitespace
-func (a *Analyzer) collectTokens(expression string, lexer *parser.ExpressionLexer, tokens *[]models.TokenInfo) {
+func (a *Analyzer) collectTokens(expression string, lexer *parser.ExpressionLexer) []models.TokenInfo {
+	tokens := make([]models.TokenInfo, 0)
 
 	for {
 		token := lexer.NextToken()
 		if token.GetTokenType() == antlr.TokenEOF {
 			// Add EOF token
-			*tokens = append(*tokens, models.TokenInfo{
-				Type:    models.TokenEOF,
-				Text:    "",
-				Start:   token.GetStart(),
-				End:     token.GetStart(),
-				Line:    token.GetLine(),
-				Column:  token.GetColumn(),
-				IsValid: true,
+			tokens = append(tokens, models.TokenInfo{
+				Type:   models.TokenEOF,
+				Text:   "",
+				Start:  token.GetStart(),
+				End:    token.GetStart(),
+				Line:   token.GetLine(),
+				Column: token.GetColumn(),
 			})
 			break
 		}
 
-		tokenInfo := models.TokenInfo{
-			Text:    token.GetText(),
-			Start:   token.GetStart(),
-			End:     token.GetStop() + 1,
-			Line:    token.GetLine(),
-			Column:  token.GetColumn(),
-			IsValid: true,
+		// Skip tokens from HIDDEN channel and ERROR_CHAR channel (they'll be handled separately)
+		// channel(HIDDEN) = 1, channel(2) is for ERROR_CHAR
+		if token.GetChannel() == antlr.LexerHidden || token.GetChannel() == 2 {
+			continue
 		}
 
 		// Determine token type based on token type from lexer
-		tokenInfo.Type = a.getTokenType(token.GetTokenType())
-
-		*tokens = append(*tokens, tokenInfo)
+		tokenType := a.getTokenType(token.GetTokenType())
+		if tokenType == models.TokenColumnReference {
+			leftBracket := models.TokenInfo{
+				Type:   models.TokenLeftBracket,
+				Text:   "[",
+				Start:  token.GetStart(),
+				End:    token.GetStart() + 1,
+				Line:   token.GetLine(),
+				Column: token.GetColumn(),
+			}
+			identifier := models.TokenInfo{
+				Type:   models.TokenColumnReference,
+				Text:   token.GetText()[1 : len(token.GetText())-1],
+				Start:  token.GetStart() + 1,
+				End:    token.GetStop(),
+				Line:   token.GetLine(),
+				Column: token.GetColumn() + 1,
+			}
+			rightBracket := models.TokenInfo{
+				Type:   models.TokenRightBracket,
+				Text:   "]",
+				Start:  token.GetStop(),
+				End:    token.GetStop() + 1,
+				Line:   token.GetLine(),
+				Column: token.GetColumn() + 1 + len(identifier.Text),
+			}
+			tokens = append(tokens, leftBracket, identifier, rightBracket)
+		} else {
+			tokenInfo := models.TokenInfo{
+				Type:   tokenType,
+				Text:   token.GetText(),
+				Start:  token.GetStart(),
+				End:    token.GetStop() + 1,
+				Line:   token.GetLine(),
+				Column: token.GetColumn(),
+			}
+			tokens = append(tokens, tokenInfo)
+		}
 	}
 
-	// Also collect whitespace tokens by analyzing the original string
-	a.addWhitespaceTokens(expression, tokens)
+	// Also collect whitespace tokens from HIDDEN channel
+	tokens = append(tokens, a.whitespaceTokens(expression)...)
+
+	// Also collect ERROR_CHAR tokens from channel 2
+	tokens = append(tokens, a.errorCharTokens(expression)...)
+
+	// Sort tokens by position
+	sort.SliceStable(tokens, func(i, j int) bool {
+		return tokens[i].Start < tokens[j].Start
+	})
+
+	// Merge consecutive error tokens
+	tokens = a.mergeConsecutiveErrorTokens(tokens)
+
+	return tokens
 }
 
 // getTokenType maps ANTLR token types to our TokenType enum
@@ -168,7 +236,7 @@ func (a *Analyzer) getTokenType(antlrTokenType int) models.TokenType {
 		return models.TokenFloat
 	case parser.ExpressionLexerBOOLEAN_LITERAL:
 		return models.TokenBoolean
-	case parser.ExpressionLexerIDENTIFIER:
+	case parser.ExpressionLexerCOLUMN_REF:
 		return models.TokenColumnReference
 	case parser.ExpressionLexerFUNCTION_NAME:
 		return models.TokenFunction
@@ -186,102 +254,107 @@ func (a *Analyzer) getTokenType(antlrTokenType int) models.TokenType {
 		return models.TokenRightBracket
 	case parser.ExpressionLexerCOMMA:
 		return models.TokenComma
+	case parser.ExpressionLexerERROR_CHAR:
+		return models.TokenError
 	default:
 		return models.TokenError
 	}
 }
 
-// addWhitespaceTokens adds whitespace tokens that were skipped by the lexer
-func (a *Analyzer) addWhitespaceTokens(expression string, tokens *[]models.TokenInfo) {
-	// Sort existing tokens by start position
-	existingTokens := *tokens
+func (a *Analyzer) collectAntlrTokens(expression string) []antlr.Token {
+	// Create a new lexer to collect tokens from all channels
+	lexer := a.helper.CreateLexer(expression)
 
-	// Create a map of covered positions
-	covered := make(map[int]bool)
-	for _, token := range existingTokens {
-		for i := token.Start; i < token.End; i++ {
-			covered[i] = true
-		}
-	}
+	// Create token stream that includes HIDDEN channel
+	stream := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
+	stream.Fill()
 
-	// Find whitespace gaps
-	line := 1
-	column := 0
-
-	for i, char := range expression {
-		if !covered[i] {
-			// This position is not covered by any token, check if it's whitespace
-			if char == ' ' || char == '\t' || char == '\r' || char == '\n' {
-				// Find the end of this whitespace sequence
-				start := i
-				end := i
-				wsText := ""
-
-				for j := i; j < len(expression) && !covered[j]; j++ {
-					if expression[j] == ' ' || expression[j] == '\t' || expression[j] == '\r' || expression[j] == '\n' {
-						wsText += string(expression[j])
-						end = j + 1
-					} else {
-						break
-					}
-				}
-
-				if end > start {
-					wsToken := models.TokenInfo{
-						Type:    models.TokenWhitespace,
-						Text:    wsText,
-						Start:   start,
-						End:     end,
-						Line:    line,
-						Column:  column,
-						IsValid: true,
-					}
-
-					// Insert in correct position
-					inserted := false
-					for idx, existing := range *tokens {
-						if existing.Start > start {
-							// Insert before this token
-							*tokens = append((*tokens)[:idx], append([]models.TokenInfo{wsToken}, (*tokens)[idx:]...)...)
-							inserted = true
-							break
-						}
-					}
-					if !inserted {
-						*tokens = append(*tokens, wsToken)
-					}
-
-					// Mark these positions as covered
-					for k := start; k < end; k++ {
-						covered[k] = true
-					}
-				}
-			}
-		}
-
-		// Update line and column tracking
-		if char == '\n' {
-			line++
-			column = 0
-		} else {
-			column++
-		}
-	}
-
-	// Sort tokens by start position to ensure proper order
-	a.sortTokens(tokens)
+	return stream.GetAllTokens()
 }
 
-// sortTokens sorts tokens by their start position
-func (a *Analyzer) sortTokens(tokens *[]models.TokenInfo) {
-	// Simple bubble sort for small token arrays
-	for i := 0; i < len(*tokens)-1; i++ {
-		for j := 0; j < len(*tokens)-i-1; j++ {
-			if (*tokens)[j].Start > (*tokens)[j+1].Start {
-				(*tokens)[j], (*tokens)[j+1] = (*tokens)[j+1], (*tokens)[j]
-			}
+// addWhitespaceTokens adds whitespace tokens from HIDDEN channel
+func (a *Analyzer) whitespaceTokens(expression string) []models.TokenInfo {
+	whiteSpaceTokens := make([]models.TokenInfo, 0)
+
+	for _, token := range a.collectAntlrTokens(expression) {
+		// Check if this is a WS token in HIDDEN channel
+		if token.GetChannel() == antlr.LexerHidden {
+			whiteSpaceTokens = append(whiteSpaceTokens, models.TokenInfo{
+				Type:   models.TokenWhitespace,
+				Text:   token.GetText(),
+				Start:  token.GetStart(),
+				End:    token.GetStop() + 1,
+				Line:   token.GetLine(),
+				Column: token.GetColumn(),
+			})
 		}
 	}
+	return whiteSpaceTokens
+}
+
+// errorCharTokens collects ERROR_CHAR tokens from channel 2
+func (a *Analyzer) errorCharTokens(expression string) []models.TokenInfo {
+	errorTokens := make([]models.TokenInfo, 0)
+
+	for _, token := range a.collectAntlrTokens(expression) {
+		// Check if this is an ERROR_CHAR token in channel 2
+		if token.GetChannel() == 2 {
+			errorTokens = append(errorTokens, models.TokenInfo{
+				Type:   models.TokenError,
+				Text:   token.GetText(),
+				Start:  token.GetStart(),
+				End:    token.GetStop() + 1,
+				Line:   token.GetLine(),
+				Column: token.GetColumn(),
+			})
+		}
+	}
+	return errorTokens
+}
+
+// mergeConsecutiveErrorTokens merges consecutive error tokens into single tokens
+func (a *Analyzer) mergeConsecutiveErrorTokens(tokens []models.TokenInfo) []models.TokenInfo {
+	if len(tokens) == 0 {
+		return tokens
+	}
+
+	merged := make([]models.TokenInfo, 0, len(tokens))
+	var currentError *models.TokenInfo
+
+	for i := 0; i < len(tokens); i++ {
+		token := tokens[i]
+
+		if token.Type == models.TokenError {
+			if currentError == nil {
+				// Start a new error token
+				errorCopy := token
+				currentError = &errorCopy
+			} else if currentError.End == token.Start {
+				// Consecutive error token, merge it
+				currentError.Text += token.Text
+				currentError.End = token.End
+			} else {
+				// Non-consecutive error token, save current and start new
+				merged = append(merged, *currentError)
+				errorCopy := token
+				currentError = &errorCopy
+			}
+		} else {
+			// Non-error token
+			if currentError != nil {
+				merged = append(merged, *currentError)
+				currentError = nil
+			}
+			merged = append(merged, token)
+		}
+	}
+
+	// Don't forget the last error token if there is one
+	if currentError != nil {
+		merged = append(merged, *currentError)
+	}
+
+	return merged
 }
 
 // markErrorTokens marks tokens as invalid if they overlap with error regions
@@ -291,7 +364,7 @@ func (a *Analyzer) markErrorTokens(tokens *[]models.TokenInfo, errors []models.E
 		for _, err := range errors {
 			// Check if token overlaps with error region
 			if token.Start < err.End && token.End > err.Start {
-				token.IsValid = false
+				token.Type = models.TokenError
 				// Preserve original type but mark as invalid
 				// Could also change type to TokenError if preferred
 			}
@@ -472,7 +545,7 @@ func (v *validationVisitor) VisitLiteral(ctx *parser.LiteralContext) any {
 
 func (v *validationVisitor) VisitColumnReference(ctx *parser.ColumnReferenceContext) any {
 	// Column references are valid if they have a non-empty identifier
-	if ctx.IDENTIFIER() != nil && ctx.IDENTIFIER().GetText() != "" {
+	if ctx.COLUMN_REF() != nil && ctx.COLUMN_REF().GetText() != "" {
 		return true
 	}
 	return false

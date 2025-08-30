@@ -48,6 +48,10 @@ export class AntlrEditorComponent implements OnInit, AfterViewInit {
       formatKeymap(this.analyzer), // Add format keyboard shortcuts
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {
+          // Skip updates during IME composition to prevent text disappearing
+          if (update.view.composing) {
+            return;
+          }
           const value = update.state.doc.toString();
           this.valueChange.emit(value);
         }
@@ -71,6 +75,11 @@ export class AntlrEditorComponent implements OnInit, AfterViewInit {
   }
 
   setValue(value: string) {
+    // Skip setting value during IME composition
+    if (this.editorView.composing) {
+      return;
+    }
+
     const transaction = this.editorView.state.update({
       changes: {
         from: 0,

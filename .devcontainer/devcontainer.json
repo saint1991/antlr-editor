@@ -14,8 +14,7 @@
     "--cap-add=NET_RAW"
   ],
   "features": {
-    "ghcr.io/devcontainers/features/github-cli": {},
-    "ghcr.io/guiyomh/features/golangci-lint:0": {}
+    "ghcr.io/devcontainers/features/github-cli": {}
   },
   "customizations": {
     "vscode": {
@@ -50,13 +49,19 @@
       }
     }
   },
+  "remoteEnv": {
+    "NODE_OPTIONS": "--max-old-space-size=4096",
+    "CLAUDE_CONFIG_DIR": "/home/node/.claude"
+  },
   "postCreateCommand": "sudo /usr/local/bin/init-firewall.sh",
   "remoteUser": "node",
   "mounts": [
-    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
-    "source=${localEnv:HOME}/.p10k.zsh,target=/home/node/.p10k.zsh,type=bind,consistency=cached",
-    "source=${localEnv:HOME}/.zinit.zsh,target=/home/node/.zinit.zsh,type=bind,consistency=cached"
+    "source=${localEnv:HOME}/.zinit.zsh,target=/home/node/.zinit.zsh,type=bind,consistency=cached",
+    "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
+    "source=claude-code-config-${devcontainerId},target=/home/node/.claude,type=volume",
+    "source=${localEnv:HOME}/.serena,target=/home/node/.serena,type=bind,consistency=cached"
   ],
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
   "workspaceFolder": "/workspace",
   "forwardPorts": []
 }

@@ -28,7 +28,6 @@ typedef struct {
     int32_t end;                // End position
     int32_t line;               // Line number (1-based)
     int32_t column;             // Column number (0-based)
-    int32_t is_valid;           // 0 or 1 for boolean
 } CTokenInfo;
 
 #endif // TOKEN_H
