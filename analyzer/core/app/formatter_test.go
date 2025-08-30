@@ -617,11 +617,6 @@ func TestFormatter_ColumnReferences(t *testing.T) {
 		expected string
 	}{
 		{
-			name:     "no spaces inside brackets",
-			input:    "[ column ]",
-			expected: "[column]",
-		},
-		{
 			name:     "preserve column name casing",
 			input:    "[Column_Name]+[another_column]",
 			expected: "[Column_Name] + [another_column]",

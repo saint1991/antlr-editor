@@ -22,6 +22,15 @@ func NewParserHelper() *ParserHelper {
 	return &ParserHelper{}
 }
 
+// CreateLexer creates a fresh lexer for token collection
+// This is useful when you need to collect all tokens including whitespace
+func (h *ParserHelper) CreateLexer(expression string) *parser.ExpressionLexer {
+	input := antlr.NewInputStream(expression)
+	lexer := parser.NewExpressionLexer(input)
+	lexer.RemoveErrorListeners()
+	return lexer
+}
+
 // CreateParser creates and initializes a parser context with the given expression
 func (h *ParserHelper) CreateParser(expression string) *ParserContext {
 	// Create input stream from expression string
@@ -65,13 +74,4 @@ func (h *ParserHelper) ParseExpression(ctx *ParserContext) parser.IExpressionCon
 // IsAllTokensConsumed checks if all tokens were consumed during parsing
 func (h *ParserHelper) IsAllTokensConsumed(ctx *ParserContext) bool {
 	return ctx.Parser.GetCurrentToken().GetTokenType() == antlr.TokenEOF
-}
-
-// CreateLexerForTokenCollection creates a fresh lexer for token collection
-// This is useful when you need to collect all tokens including whitespace
-func (h *ParserHelper) CreateLexerForTokenCollection(expression string) *parser.ExpressionLexer {
-	input := antlr.NewInputStream(expression)
-	lexer := parser.NewExpressionLexer(input)
-	lexer.RemoveErrorListeners()
-	return lexer
 }

@@ -32,23 +32,21 @@ const (
 
 // TokenInfo contains detailed information about a token
 type TokenInfo struct {
-	Type    TokenType `json:"type"`    // Token type
-	Text    string    `json:"text"`    // Token text
-	Start   int       `json:"start"`   // Start position in string (0-based)
-	End     int       `json:"end"`     // End position in string (0-based, exclusive)
-	Line    int       `json:"line"`    // Line number (1-based)
-	Column  int       `json:"column"`  // Column number (0-based)
-	IsValid bool      `json:"isValid"` // Whether this token is in error state
+	Type   TokenType `json:"type"`   // Token type
+	Text   string    `json:"text"`   // Token text
+	Start  int       `json:"start"`  // Start position in string (0-based)
+	End    int       `json:"end"`    // End position in string (0-based, exclusive)
+	Line   int       `json:"line"`   // Line number (1-based)
+	Column int       `json:"column"` // Column number (0-based)
 }
 
 func (t *TokenInfo) AsMap() map[string]any {
 	return map[string]any{
-		"type":    string(t.Type),
-		"text":    t.Text,
-		"start":   t.Start,
-		"end":     t.End,
-		"line":    t.Line,
-		"column":  t.Column,
-		"isValid": t.IsValid,
+		"type":   string(t.Type),
+		"text":   t.Text,
+		"start":  t.Start,
+		"end":    t.End,
+		"line":   t.Line,
+		"column": t.Column,
 	}
 }

@@ -35,14 +35,6 @@ var toCTokenType = map[models.TokenType]C.enum_TokenType{
 	models.TokenEOF:             C.TOKEN_TYPE_EOF,
 }
 
-// Helper function to convert bool to int
-func boolToInt(b bool) int {
-	if b {
-		return 1
-	}
-	return 0
-}
-
 // Free allocated C strings in CTokenInfo
 func freeCTokenInfo(token *C.CTokenInfo) {
 	if token.text != nil {
@@ -66,7 +58,6 @@ func ToCTokenInfo(token models.TokenInfo) C.CTokenInfo {
 		end:        C.int32_t(token.End),
 		line:       C.int32_t(token.Line),
 		column:     C.int32_t(token.Column),
-		is_valid:   C.int32_t(boolToInt(token.IsValid)),
 	}
 }
 

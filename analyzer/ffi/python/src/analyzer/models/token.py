@@ -32,4 +32,3 @@ class TokenInfo:
     end: int
     line: int
     column: int
-    is_valid: bool

@@ -20,7 +20,6 @@ class CTokenInfo(ctypes.Structure):
         ("end", ctypes.c_int32),
         ("line", ctypes.c_int32),
         ("column", ctypes.c_int32),
-        ("is_valid", ctypes.c_int32),
     ]
 
 
@@ -160,7 +159,6 @@ class Analyzer:
                     end=c_token.end,
                     line=c_token.line,
                     column=c_token.column,
-                    is_valid=bool(c_token.is_valid),
                 )
                 tokens.append(token)
 

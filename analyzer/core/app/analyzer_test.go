@@ -153,6 +153,7 @@ func TestAnalyzer_Validate(t *testing.T) {
 		{"negative float", "-3.14", true},
 		{"negative in expression", "[total] + -100", true},
 		{"complex nested functions", "ROUND(AVG(SUM([values]), COUNT([items])))", true},
+		{"invalid expression - mismatched parentheses", "(1 + 2))", false},
 	}
 
 	for _, tt := range tests {
