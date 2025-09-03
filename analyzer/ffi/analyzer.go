@@ -112,7 +112,7 @@ func ValidateFFIString(expression *C.char) C.int {
 
 func tokenize(expression string) *C.CTokenizeResult {
 	// Get analysis result
-	result := analyzer.Analyze(expression)
+	result := analyzer.Tokenize(expression)
 
 	// Allocate C struct
 	cResult := (*C.CTokenizeResult)(C.malloc(C.sizeof_CTokenizeResult))

@@ -32,7 +32,7 @@ func main() {
 
 		// Show details for invalid expressions containing error characters
 		if expr == "123abc" || expr == "hello@#$%" {
-			result := application.Analyze(expr)
+			result := application.Tokenize(expr)
 			fmt.Printf("  Tokens: %d\n", len(result.Tokens))
 			for _, tok := range result.Tokens {
 				fmt.Printf("    '%s' (type: %s, pos: %d-%d)\n",

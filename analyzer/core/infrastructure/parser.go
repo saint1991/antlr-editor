@@ -73,5 +73,6 @@ func (h *ParserHelper) ParseExpression(ctx *ParserContext) parser.IExpressionCon
 
 // IsAllTokensConsumed checks if all tokens were consumed during parsing
 func (h *ParserHelper) IsAllTokensConsumed(ctx *ParserContext) bool {
-	return ctx.Parser.GetCurrentToken().GetTokenType() == antlr.TokenEOF
+	token := ctx.Parser.GetCurrentToken()
+	return token.GetTokenType() == antlr.TokenEOF
 }
