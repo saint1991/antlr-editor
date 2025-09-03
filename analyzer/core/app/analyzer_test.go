@@ -612,67 +612,76 @@ func TestAnalyzer_ParseTree(t *testing.T) {
 		t.Errorf("Expected valid expression, got %d errors", len(result.Errors))
 	}
 
+	// The new structure wraps the actual expression with an Expression root node
 	expected := &models.ParseTreeNode{
-		Type:  models.NodeTypeComparisonExpr,
+		Type:  models.NodeTypeExpression,
 		Text:  "SUM([sales]) > AVG([revenue])",
 		Start: 0,
 		End:   len(expression),
 		Children: []models.ParseTreeNode{
 			{
-				Type:  models.NodeTypeFunctionCall,
-				Text:  "SUM([sales])",
+				Type:  models.NodeTypeComparisonExpr,
+				Text:  "SUM([sales]) > AVG([revenue])",
 				Start: 0,
-				End:   12,
+				End:   len(expression),
 				Children: []models.ParseTreeNode{
 					{
-						Type:     models.NodeTypeFunctionName,
-						Text:     "SUM",
-						Start:    0,
-						End:      3,
-						Children: []models.ParseTreeNode{},
-					},
-					{
-						Type:  models.NodeTypeArgumentList,
-						Text:  "[sales]",
-						Start: 4,
-						End:   11,
+						Type:  models.NodeTypeFunctionCall,
+						Text:  "SUM([sales])",
+						Start: 0,
+						End:   12,
 						Children: []models.ParseTreeNode{
 							{
-								Type:     models.NodeTypeColumnRefExpr,
-								Text:     "[sales]",
-								Start:    4,
-								End:      11,
+								Type:     models.NodeTypeFunctionName,
+								Text:     "SUM",
+								Start:    0,
+								End:      3,
 								Children: []models.ParseTreeNode{},
+							},
+							{
+								Type:  models.NodeTypeArgumentList,
+								Text:  "[sales]",
+								Start: 4,
+								End:   11,
+								Children: []models.ParseTreeNode{
+									{
+										Type:     models.NodeTypeColumnRefExpr,
+										Text:     "[sales]",
+										Start:    4,
+										End:      11,
+										Children: []models.ParseTreeNode{},
+									},
+								},
 							},
 						},
 					},
-				},
-			},
-			{
-				Type:  models.NodeTypeFunctionCall,
-				Text:  "AVG([revenue])",
-				Start: 15,
-				End:   29,
-				Children: []models.ParseTreeNode{
 					{
-						Type:     models.NodeTypeFunctionName,
-						Text:     "AVG",
-						Start:    15,
-						End:      18,
-						Children: []models.ParseTreeNode{},
-					},
-					{
-						Type:  models.NodeTypeArgumentList,
-						Text:  "[revenue]",
-						Start: 19,
-						End:   28,
+						Type:  models.NodeTypeFunctionCall,
+						Text:  "AVG([revenue])",
+						Start: 15,
+						End:   29,
 						Children: []models.ParseTreeNode{
 							{
-								Type:     models.NodeTypeColumnRefExpr,
-								Text:     "[revenue]",
-								Start:    19,
-								End:      28,
+								Type:     models.NodeTypeFunctionName,
+								Text:     "AVG",
+								Start:    15,
+								End:      18,
 								Children: []models.ParseTreeNode{},
+							},
+							{
+								Type:  models.NodeTypeArgumentList,
+								Text:  "[revenue]",
+								Start: 19,
+								End:   28,
+								Children: []models.ParseTreeNode{
+									{
+										Type:     models.NodeTypeColumnRefExpr,
+										Text:     "[revenue]",
+										Start:    19,
+										End:      28,
+										Children: []models.ParseTreeNode{},
+									},
+								},
 							},
 						},
 					},
@@ -1064,9 +1073,19 @@ func TestAnalyzer_ParseTreeAdvanced(t *testing.T) {
 			t.Errorf("Expected valid expression, got %d errors", len(result.Errors))
 		}
 
-		// Verify root node is arithmetic expression
-		if result.Tree.Type != models.NodeTypeAddSubExpr && result.Tree.Type != models.NodeTypeMulDivExpr {
-			t.Errorf("Expected root to be arithmetic expression, got %v", result.Tree.Type)
+		// Verify root node is Expression, then check the actual expression child
+		if result.Tree.Type != models.NodeTypeExpression {
+			t.Errorf("Expected root to be Expression, got %v", result.Tree.Type)
+		}
+
+		// Check the actual expression child node
+		if len(result.Tree.Children) != 1 {
+			t.Errorf("Expected 1 child for Expression root, got %d", len(result.Tree.Children))
+		}
+
+		actualExpr := &result.Tree.Children[0]
+		if actualExpr.Type != models.NodeTypeAddSubExpr && actualExpr.Type != models.NodeTypeMulDivExpr {
+			t.Errorf("Expected child to be arithmetic expression, got %v", actualExpr.Type)
 		}
 
 		// Verify tree has proper nesting depth
@@ -1084,14 +1103,24 @@ func TestAnalyzer_ParseTreeAdvanced(t *testing.T) {
 			t.Errorf("Expected valid expression, got %d errors", len(result.Errors))
 		}
 
-		// Verify root is logical OR expression
-		if result.Tree.Type != models.NodeTypeOrExpr {
-			t.Errorf("Expected root to be logical expression, got %v", result.Tree.Type)
+		// Verify root is Expression
+		if result.Tree.Type != models.NodeTypeExpression {
+			t.Errorf("Expected root to be Expression, got %v", result.Tree.Type)
+		}
+
+		// Check the actual expression child node
+		if len(result.Tree.Children) != 1 {
+			t.Errorf("Expected 1 child for Expression root, got %d", len(result.Tree.Children))
+		}
+
+		actualExpr := &result.Tree.Children[0]
+		if actualExpr.Type != models.NodeTypeOrExpr {
+			t.Errorf("Expected child to be logical OR expression, got %v", actualExpr.Type)
 		}
 
 		// Verify both sides have logical AND expressions
-		if len(result.Tree.Children) != 2 {
-			t.Errorf("Expected 2 children for OR expression, got %d", len(result.Tree.Children))
+		if len(actualExpr.Children) != 2 {
+			t.Errorf("Expected 2 children for OR expression, got %d", len(actualExpr.Children))
 		}
 	})
 
@@ -1150,13 +1179,24 @@ func TestAnalyzer_ParseTreeAdvanced(t *testing.T) {
 				t.Errorf("Expression '%s' should be valid, got errors", expr)
 			}
 
-			if result.Tree.Type != models.NodeTypeComparisonExpr {
-				t.Errorf("Expected comparison expression for '%s', got %v", expr, result.Tree.Type)
+			// Check root is Expression
+			if result.Tree.Type != models.NodeTypeExpression {
+				t.Errorf("Expected root to be Expression for '%s', got %v", expr, result.Tree.Type)
+			}
+
+			// Check actual expression child
+			if len(result.Tree.Children) != 1 {
+				t.Errorf("Expected 1 child for Expression root in '%s', got %d", expr, len(result.Tree.Children))
+			}
+
+			actualExpr := &result.Tree.Children[0]
+			if actualExpr.Type != models.NodeTypeComparisonExpr {
+				t.Errorf("Expected child to be comparison expression for '%s', got %v", expr, actualExpr.Type)
 			}
 
 			// Should have exactly 2 children (left and right operands)
-			if len(result.Tree.Children) != 2 {
-				t.Errorf("Comparison '%s' should have 2 children, got %d", expr, len(result.Tree.Children))
+			if len(actualExpr.Children) != 2 {
+				t.Errorf("Comparison '%s' should have 2 children, got %d", expr, len(actualExpr.Children))
 			}
 		}
 	})
@@ -1181,39 +1221,48 @@ func TestAnalyzer_ParseTreeAdvanced(t *testing.T) {
 			t.Errorf("Expected valid expression with empty function args, got %d errors", len(result.Errors))
 		}
 
+		// Update expected structure with Expression root node
 		expected := models.ParseTreeNode{
-			Type:  models.NodeTypeAddSubExpr,
+			Type:  models.NodeTypeExpression,
 			Text:  "NOW() + COUNT()",
 			Start: 0,
 			End:   15,
 			Children: []models.ParseTreeNode{
 				{
-					Type:  models.NodeTypeFunctionCall,
-					Text:  "NOW()",
+					Type:  models.NodeTypeAddSubExpr,
+					Text:  "NOW() + COUNT()",
 					Start: 0,
-					End:   5,
-					Children: []models.ParseTreeNode{
-						{
-							Type:     models.NodeTypeFunctionName,
-							Text:     "NOW",
-							Start:    0,
-							End:      3,
-							Children: []models.ParseTreeNode{},
-						},
-					},
-				},
-				{
-					Type:  models.NodeTypeFunctionCall,
-					Text:  "COUNT()",
-					Start: 8,
 					End:   15,
 					Children: []models.ParseTreeNode{
 						{
-							Type:     models.NodeTypeFunctionName,
-							Text:     "COUNT",
-							Start:    8,
-							End:      13,
-							Children: []models.ParseTreeNode{},
+							Type:  models.NodeTypeFunctionCall,
+							Text:  "NOW()",
+							Start: 0,
+							End:   5,
+							Children: []models.ParseTreeNode{
+								{
+									Type:     models.NodeTypeFunctionName,
+									Text:     "NOW",
+									Start:    0,
+									End:      3,
+									Children: []models.ParseTreeNode{},
+								},
+							},
+						},
+						{
+							Type:  models.NodeTypeFunctionCall,
+							Text:  "COUNT()",
+							Start: 8,
+							End:   15,
+							Children: []models.ParseTreeNode{
+								{
+									Type:     models.NodeTypeFunctionName,
+									Text:     "COUNT",
+									Start:    8,
+									End:      13,
+									Children: []models.ParseTreeNode{},
+								},
+							},
 						},
 					},
 				},

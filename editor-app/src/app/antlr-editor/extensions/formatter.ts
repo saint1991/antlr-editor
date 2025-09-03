@@ -6,7 +6,7 @@ export const formatExpression = (analyzer: Analyzer) => (view: EditorView) => {
   const currentDoc = view.state.doc.toString();
 
   try {
-    const formatted = analyzer.formatExpression(currentDoc);
+    const formatted = analyzer.format(currentDoc);
 
     if (formatted === currentDoc) {
       return false;
