@@ -10,3 +10,6 @@ libanalyzer.h
 *.egg-info/
 .playwright/
 playwright/
+
+wasm_exec.js
+analyzer.wasm

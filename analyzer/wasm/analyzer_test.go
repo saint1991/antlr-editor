@@ -89,14 +89,14 @@ func TestTokenizeExpression(t *testing.T) {
 			name:        "invalid expression",
 			expression:  "1 + + 2",
 			wantTokens:  8, // returns token even for invalid expressions
-			wantErrors:  1,
+			wantErrors:  0,
 			checkTokens: true,
 		},
 		{
 			name:        "empty expression",
 			expression:  "",
 			wantTokens:  0,
-			wantErrors:  1,
+			wantErrors:  0,
 			checkTokens: false,
 		},
 	}

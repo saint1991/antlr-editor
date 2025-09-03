@@ -1,14 +1,17 @@
 import { type AfterViewInit, Component, type ElementRef, EventEmitter, Input, type OnInit, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { indentWithTab } from '@codemirror/commands';
-import { bracketMatching, foldGutter, foldKeymap, indentUnit } from '@codemirror/language';
+import { bracketMatching, foldGutter, foldKeymap, indentUnit, syntaxHighlighting } from '@codemirror/language';
 import type { Extension } from '@codemirror/state';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { keymap, lineNumbers } from '@codemirror/view';
 import { basicSetup, EditorView } from 'codemirror';
 import { type Analyzer, loadAnalyzer } from './extensions/analyzer';
+import { expressionAutocompletion } from './extensions/autocomplete';
+import { darkHighlightStyle } from './extensions/dark-highlight-style';
+import { expressionLanguageSupport } from './extensions/expression-language';
 import { formatExpression, formatKeymap } from './extensions/formatter';
-import { expressionLanguage } from './extensions/syntax-highlight/stream-language';
+import { expressionLinter } from './extensions/linter';
 
 @Component({
   selector: 'antlr-editor',
@@ -40,7 +43,10 @@ export class AntlrEditorComponent implements OnInit, AfterViewInit {
       basicSetup,
       keymap.of([indentWithTab]),
       indentUnit.of('  '),
-      expressionLanguage(this.analyzer, this.theme), // Add syntax highlighting with theme
+      expressionLanguageSupport(this.analyzer), // Expression language with syntax highlighting
+      syntaxHighlighting(darkHighlightStyle), // Dark theme optimized highlighting
+      expressionLinter(this.analyzer), // Error highlighting with underlines
+      expressionAutocompletion(), // Function name autocompletion
       bracketMatching(),
       lineNumbers(),
       foldGutter(),

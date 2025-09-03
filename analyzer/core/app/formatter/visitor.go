@@ -24,28 +24,28 @@ var (
 	}
 )
 
-// FormatVisitor implements the ExpressionVisitor interface for formatting
-type FormatVisitor struct {
+// Visitor implements the ExpressionVisitor interface for formatting
+type Visitor struct {
 	*parser.BaseExpressionVisitor
 	ctx *FormatterContext
 }
 
-func NewFormatterVisitor(options *FormatOptions) *FormatVisitor {
+func NewFormatterVisitor(options *FormatOptions) *Visitor {
 	if options == nil {
 		options = DefaultFormatOptions()
 	}
-	return &FormatVisitor{
+	return &Visitor{
 		BaseExpressionVisitor: &parser.BaseExpressionVisitor{},
 		ctx:                   newFormatterContext(options),
 	}
 }
 
-func (v *FormatVisitor) Finalize() string {
+func (v *Visitor) Finalize() string {
 	return v.ctx.finalize()
 }
 
 // Visit visits a parse tree node
-func (v *FormatVisitor) Visit(tree antlr.ParseTree) any {
+func (v *Visitor) Visit(tree antlr.ParseTree) any {
 	if tree == nil {
 		return nil
 	}
@@ -53,24 +53,24 @@ func (v *FormatVisitor) Visit(tree antlr.ParseTree) any {
 }
 
 // VisitLiteralExpr formats a literal expression
-func (v *FormatVisitor) VisitLiteralExpr(ctx *parser.LiteralExprContext) any {
+func (v *Visitor) VisitLiteralExpr(ctx *parser.LiteralExprContext) any {
 	return v.Visit(ctx.Literal())
 }
 
 // VisitLiteral formats a literal value
-func (v *FormatVisitor) VisitLiteral(ctx *parser.LiteralContext) any {
+func (v *Visitor) VisitLiteral(ctx *parser.LiteralContext) any {
 	// Get the literal text and write it as-is
 	v.ctx.write(ctx.GetText())
 	return nil
 }
 
 // VisitColumnRefExpr formats a column reference expression
-func (v *FormatVisitor) VisitColumnRefExpr(ctx *parser.ColumnRefExprContext) any {
+func (v *Visitor) VisitColumnRefExpr(ctx *parser.ColumnRefExprContext) any {
 	return v.Visit(ctx.ColumnReference())
 }
 
 // VisitColumnReference formats a column reference
-func (v *FormatVisitor) VisitColumnReference(ctx *parser.ColumnReferenceContext) any {
+func (v *Visitor) VisitColumnReference(ctx *parser.ColumnReferenceContext) any {
 	if ctx.COLUMN_REF() != nil {
 		v.ctx.write(ctx.COLUMN_REF().GetText())
 	}
@@ -78,7 +78,7 @@ func (v *FormatVisitor) VisitColumnReference(ctx *parser.ColumnReferenceContext)
 }
 
 // VisitParenExpr formats a parenthesized expression
-func (v *FormatVisitor) VisitParenExpr(ctx *parser.ParenExprContext) any {
+func (v *Visitor) VisitParenExpr(ctx *parser.ParenExprContext) any {
 	v.ctx.write("(")
 	v.Visit(ctx.Expression())
 	v.ctx.write(")")
@@ -86,19 +86,19 @@ func (v *FormatVisitor) VisitParenExpr(ctx *parser.ParenExprContext) any {
 }
 
 // VisitUnaryMinusExpr formats a unary minus expression
-func (v *FormatVisitor) VisitUnaryMinusExpr(ctx *parser.UnaryMinusExprContext) any {
+func (v *Visitor) VisitUnaryMinusExpr(ctx *parser.UnaryMinusExprContext) any {
 	v.ctx.write("-")
 	v.Visit(ctx.Expression())
 	return nil
 }
 
 // VisitFunctionCallExpr formats a function call expression
-func (v *FormatVisitor) VisitFunctionCallExpr(ctx *parser.FunctionCallExprContext) any {
+func (v *Visitor) VisitFunctionCallExpr(ctx *parser.FunctionCallExprContext) any {
 	return v.Visit(ctx.FunctionCall())
 }
 
 // VisitFunctionCall formats a function call
-func (v *FormatVisitor) VisitFunctionCall(ctx *parser.FunctionCallContext) any {
+func (v *Visitor) VisitFunctionCall(ctx *parser.FunctionCallContext) any {
 	v.ctx.enterFunction()
 	defer v.ctx.exitFunction()
 
@@ -151,7 +151,7 @@ func (v *FormatVisitor) VisitFunctionCall(ctx *parser.FunctionCallContext) any {
 }
 
 // VisitArgumentList formats a function argument list
-func (v *FormatVisitor) VisitArgumentList(ctx *parser.ArgumentListContext) any {
+func (v *Visitor) VisitArgumentList(ctx *parser.ArgumentListContext) any {
 	expressions := ctx.AllExpression()
 
 	for i, expr := range expressions {
@@ -165,7 +165,7 @@ func (v *FormatVisitor) VisitArgumentList(ctx *parser.ArgumentListContext) any {
 }
 
 // visitArgumentListMultiLine formats arguments in multi-line style
-func (v *FormatVisitor) visitArgumentListMultiLine(expressions []parser.IExpressionContext) {
+func (v *Visitor) visitArgumentListMultiLine(expressions []parser.IExpressionContext) {
 	for i, expr := range expressions {
 		if i > 0 {
 			v.ctx.write(",")
@@ -181,7 +181,7 @@ type HasExpressionContext interface {
 	Expression(i int) parser.IExpressionContext
 }
 
-func (v *FormatVisitor) visitBinaryExpression(ctx HasExpressionContext) any {
+func (v *Visitor) visitBinaryExpression(ctx HasExpressionContext) any {
 	v.ctx.enterExpression()
 	defer v.ctx.exitExpression()
 
@@ -229,32 +229,32 @@ func (v *FormatVisitor) visitBinaryExpression(ctx HasExpressionContext) any {
 }
 
 // VisitAndExpr formats a logical AND expression
-func (v *FormatVisitor) VisitAndExpr(ctx *parser.AndExprContext) any {
+func (v *Visitor) VisitAndExpr(ctx *parser.AndExprContext) any {
 	return v.visitBinaryExpression(ctx)
 }
 
 // VisitOrExpr formats a logical OR expression
-func (v *FormatVisitor) VisitOrExpr(ctx *parser.OrExprContext) any {
+func (v *Visitor) VisitOrExpr(ctx *parser.OrExprContext) any {
 	return v.visitBinaryExpression(ctx)
 }
 
 // VisitComparisonExpr formats a comparison expression
-func (v *FormatVisitor) VisitComparisonExpr(ctx *parser.ComparisonExprContext) any {
+func (v *Visitor) VisitComparisonExpr(ctx *parser.ComparisonExprContext) any {
 	return v.visitBinaryExpression(ctx)
 }
 
 // VisitAddSubExpr formats an addition/subtraction expression
-func (v *FormatVisitor) VisitAddSubExpr(ctx *parser.AddSubExprContext) any {
+func (v *Visitor) VisitAddSubExpr(ctx *parser.AddSubExprContext) any {
 	return v.visitBinaryExpression(ctx)
 }
 
 // VisitMulDivExpr formats a multiplication/division expression
-func (v *FormatVisitor) VisitMulDivExpr(ctx *parser.MulDivExprContext) any {
+func (v *Visitor) VisitMulDivExpr(ctx *parser.MulDivExprContext) any {
 	return v.visitBinaryExpression(ctx)
 }
 
 // VisitPowerExpr formats a power expression
-func (v *FormatVisitor) VisitPowerExpr(ctx *parser.PowerExprContext) any {
+func (v *Visitor) VisitPowerExpr(ctx *parser.PowerExprContext) any {
 	v.ctx.enterExpression()
 	defer v.ctx.exitExpression()
 

@@ -73,3 +73,47 @@
   font-size: 14px;
   line-height: 1.5;
 }
+
+/* Lint error styles */
+.editor-content :deep(.cm-lintRange-error) {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="6" height="3"><path d="m0 3 l2 -2 l1 0 l2 2 l1 0" stroke="%23d11" fill="none" stroke-width=".7"/></svg>');
+  background-position: left bottom;
+  background-repeat: repeat-x;
+  padding-bottom: 2px;
+}
+
+.editor-content :deep(.cm-lintPoint-error) {
+  position: relative;
+}
+
+.editor-content :deep(.cm-lintPoint-error::after) {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -2px;
+  width: 4px;
+  height: 4px;
+  background-color: #d11;
+  border-radius: 50%;
+}
+
+/* Lint tooltip styles */
+.editor-content :deep(.cm-lint-tooltip) {
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 14px;
+  max-width: 500px;
+}
+
+.editor-content :deep(.cm-lint-message-error) {
+  color: #d11;
+  font-weight: 500;
+}
+
+.editor-content :deep(.cm-diagnostic-error) {
+  border-left: 3px solid #d11;
+  padding-left: 8px;
+  margin: 4px 0;
+}
