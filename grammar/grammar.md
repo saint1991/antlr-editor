@@ -31,16 +31,22 @@ This document defines the grammar specification for an expression language. This
   - `1.23e-4`
   - `2.5E+3`
 
+#### 1.4 Boolean Literals
+- **Syntax**: `true` or `false` (case insensitive)
+- **Description**: Boolean values
+- **Examples**: `true`, `false`, `TRUE`, `False`
+
 ### 2. Column References
 - **Syntax**: `[identifier]`
 - **Description**: Identifiers enclosed in square brackets
 - **Constraints**: 
-  - Can contain non-ASCII characters
-  - Whitespace is not allowed
+  - Can contain any characters except brackets, whitespace, tab, carriage return, and newline
+  - No whitespace allowed inside brackets
 - **Examples**: 
   - `[name]`
-  - `[年齢]`
   - `[user_id]`
+  - `[firstName]`
+  - `[column123]`
 
 ### 3. Functions
 - **Syntax**: `FUNCTION_NAME(arguments)`
@@ -67,12 +73,21 @@ This document defines the grammar specification for an expression language. This
 #### 4.2 Comparison Operators
 - `==` : Equality
 - `!=` : Inequality
+- `<` : Less than
+- `<=` : Less than or equal
+- `>` : Greater than
+- `>=` : Greater than or equal
 
 #### 4.3 Logical Operators
 - `||` : Logical OR
 - `&&` : Logical AND
 
-### 5. Grouping
+### 5. Unary Operators
+- **Syntax**: `-expression`
+- **Description**: Unary minus operator for negating expressions
+- **Examples**: `-5`, `-[value]`, `-(2 + 3)`
+
+### 6. Grouping
 - **Syntax**: `(expression)`
 - **Description**: Expression grouping with parentheses
 - **Purpose**: Explicit control of operation precedence
@@ -87,31 +102,35 @@ expression := literal
            | column_reference
            | function_call
            | '(' expression ')'
-           | expression operator expression
+           | '-' expression
+           | expression '^' expression (right-associative)
+           | expression ('*' | '/') expression
+           | expression ('+' | '-') expression
+           | expression ('<' | '<=' | '>' | '>=' | '==' | '!=') expression
+           | expression '&&' expression
+           | expression '||' expression
 
 literal := string_literal
         | integer_literal
         | float_literal
+        | boolean_literal
 
 column_reference := '[' identifier ']'
 
 function_call := FUNCTION_NAME '(' argument_list? ')'
 
 argument_list := expression (',' expression)*
-
-operator := '+' | '-' | '*' | '/' | '^'
-         | '==' | '!='
-         | '||' | '&&'
 ```
 
 ### Operator Precedence
 1. `()` - Parentheses (highest precedence)
-2. `^` - Exponentiation
-3. `*`, `/` - Multiplication, Division
-4. `+`, `-` - Addition, Subtraction
-5. `==`, `!=` - Comparison operators
-6. `&&` - Logical AND
-7. `||` - Logical OR (lowest precedence)
+2. `-` - Unary minus
+3. `^` - Exponentiation (right-associative)
+4. `*`, `/` - Multiplication, Division
+5. `+`, `-` - Addition, Subtraction
+6. `<`, `<=`, `>`, `>=`, `==`, `!=` - Comparison operators
+7. `&&` - Logical AND
+8. `||` - Logical OR (lowest precedence)
 
 ## Usage Examples
 
@@ -120,6 +139,7 @@ operator := '+' | '-' | '*' | '/' | '^'
 [price] * [quantity]
 [total] / ([count] + 1)
 [base] ^ 2
+-[deficit]
 ```
 
 ### Function Calls
@@ -140,14 +160,20 @@ SUM([revenue]) / COUNT([transactions])
 ```
 [age] >= 18 && [verified] == true
 [category] == 'premium' || [points] > 1000
+[score] < 50 && [attempts] <= 3
 ```
 
 ## Notes and Constraints
 
-1. **Case Sensitivity**: Function names must be uppercase only
-2. **Whitespace**: Whitespace characters are not allowed within column references
+1. **Case Sensitivity**: 
+   - Function names must be uppercase only (A-Z)
+   - Boolean literals are case insensitive
+2. **Whitespace**: Whitespace characters (space, tab, CR, LF) are not allowed within column references
 3. **Escape Characters**: Quote characters within strings must be escaped with backslash
-4. **Operator Associativity**: Operators of the same precedence are left-associative
+4. **Operator Associativity**: 
+   - Exponentiation (^) is right-associative
+   - All other operators are left-associative
+5. **Error Handling**: Invalid characters are captured and reported as errors
 
 ## Future Extensions
 
@@ -170,5 +196,5 @@ Based on this grammar specification, the following work is planned:
 
 ## Related Files
 
-- `grammar/grammar.md` - Current simplified grammar definition
-- (Planned) `grammar/Expression.g4` - ANTLR grammar file
+- `grammar/grammar.md` - This grammar specification document
+- `grammar/Expression.g4` - ANTLR grammar implementation file
