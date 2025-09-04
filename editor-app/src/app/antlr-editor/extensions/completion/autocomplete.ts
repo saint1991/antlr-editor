@@ -232,7 +232,7 @@ function expressionCompletions(context: CompletionContext): CompletionResult | n
 }
 
 // Create the autocompletion extension
-export function expressionAutocompletion() {
+export const expressionAutocompletion = () => {
   return autocompletion({
     override: [expressionCompletions],
     defaultKeymap: true,
@@ -241,4 +241,4 @@ export function expressionAutocompletion() {
     optionClass: (completion) => `cm-completion-${completion.type}`,
     tooltipClass: () => 'cm-autocomplete-tooltip',
   });
-}
+};

@@ -6,12 +6,12 @@ import type { Extension } from '@codemirror/state';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { keymap, lineNumbers } from '@codemirror/view';
 import { basicSetup, EditorView } from 'codemirror';
-import { type Analyzer, loadAnalyzer } from './extensions/analyzer';
-import { expressionAutocompletion } from './extensions/autocomplete';
-import { darkHighlightStyle } from './extensions/dark-highlight-style';
-import { expressionLanguageSupport } from './extensions/expression-language';
-import { formatExpression, formatKeymap } from './extensions/formatter';
-import { expressionLinter } from './extensions/linter';
+import { type Analyzer, loadAnalyzer } from '../../wasm/analyzer';
+import { expressionAutocompletion } from './extensions/completion/autocomplete';
+import { formatExpression, formatKeymap } from './extensions/format/formatter';
+import { expressionLinter } from './extensions/lint/linter';
+import { expressionLanguageSupport } from './extensions/syntax-highlight/language';
+import { darkHighlightStyle } from './extensions/syntax-highlight/theme/dark';
 
 @Component({
   selector: 'antlr-editor',

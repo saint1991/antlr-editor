@@ -1,6 +1,6 @@
 import { type Input, NodeSet, NodeType, Parser, type PartialParse, Tree, type TreeFragment } from '@lezer/common';
 import { styleTags, tags } from '@lezer/highlight';
-import type { Analyzer, ParseTreeNode, ParseTreeResult } from './analyzer';
+import type { Analyzer, ParseTreeNode, ParseTreeResult } from '../../../../wasm/analyzer';
 
 // Define node types for our expression language (matching Go NodeType constants)
 const nodeTypeIds = {

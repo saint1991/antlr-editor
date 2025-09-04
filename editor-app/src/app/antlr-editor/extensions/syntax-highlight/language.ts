@@ -1,13 +1,13 @@
 import { LanguageSupport, LRLanguage } from '@codemirror/language';
 import { NodeProp } from '@lezer/common';
 import { styleTags, tags } from '@lezer/highlight';
-import type { Analyzer } from './analyzer';
-import { ExpressionParser, nodeSet } from './expression-parser';
+import type { Analyzer } from '../../../../wasm/analyzer';
+import { ExpressionParser, nodeSet } from './parser';
 
 // Create the expression language with proper syntax highlighting
 export const expressionLanguageSupport = (analyzer: Analyzer): LanguageSupport => {
   // Configure the parser with syntax highlighting
-  const parserWithMetadata = (new ExpressionParser(analyzer) as any).configure({
+  const parserWithMetadata = new ExpressionParser(analyzer).configure({
     props: [
       styleTags({
         StringLiteral: tags.string,

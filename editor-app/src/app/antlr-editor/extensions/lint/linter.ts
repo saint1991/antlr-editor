@@ -1,6 +1,6 @@
 import { type Diagnostic, linter } from '@codemirror/lint';
 import type { EditorView } from '@codemirror/view';
-import type { Analyzer, Error as AnalyzerError } from './analyzer';
+import type { Analyzer, Error as AnalyzerError } from '../../../../wasm/analyzer';
 
 // Convert analyzer errors to CodeMirror diagnostics
 const errorsToDiagnostics = (errors: AnalyzerError[]): Diagnostic[] => {

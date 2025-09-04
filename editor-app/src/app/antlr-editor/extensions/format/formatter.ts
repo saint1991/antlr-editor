@@ -1,6 +1,6 @@
 import { Transaction } from '@codemirror/state';
 import { type EditorView, keymap } from '@codemirror/view';
-import type { Analyzer } from './analyzer';
+import type { Analyzer } from '../../../../wasm/analyzer';
 
 export const formatExpression = (analyzer: Analyzer) => (view: EditorView) => {
   const currentDoc = view.state.doc.toString();
