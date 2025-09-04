@@ -1,17 +1,17 @@
 import { type AfterViewInit, Component, type ElementRef, EventEmitter, Input, type OnInit, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { indentWithTab } from '@codemirror/commands';
-import { bracketMatching, foldGutter, foldKeymap, indentUnit, syntaxHighlighting } from '@codemirror/language';
+import { indentWithTab, insertNewlineAndIndent } from '@codemirror/commands';
+import { bracketMatching, foldGutter, foldKeymap, indentOnInput, indentUnit, syntaxHighlighting } from '@codemirror/language';
 import type { Extension } from '@codemirror/state';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { keymap, lineNumbers } from '@codemirror/view';
 import { basicSetup, EditorView } from 'codemirror';
-import { type Analyzer, loadAnalyzer } from './extensions/analyzer';
-import { expressionAutocompletion } from './extensions/autocomplete';
-import { darkHighlightStyle } from './extensions/dark-highlight-style';
-import { expressionLanguageSupport } from './extensions/expression-language';
-import { formatExpression, formatKeymap } from './extensions/formatter';
-import { expressionLinter } from './extensions/linter';
+import { type Analyzer, loadAnalyzer } from '../../wasm/analyzer';
+import { expressionAutocompletion } from './extensions/completion/autocomplete';
+import { formatExpression, formatKeymap } from './extensions/format/formatter';
+import { expressionLinter } from './extensions/lint/linter';
+import { expressionLanguageSupport } from './extensions/syntax-highlight/language';
+import { darkHighlightStyle } from './extensions/syntax-highlight/theme/dark';
 
 @Component({
   selector: 'antlr-editor',
@@ -39,10 +39,15 @@ export class AntlrEditorComponent implements OnInit, AfterViewInit {
     // Load the WASM analyzer
     this.analyzer = await loadAnalyzer();
 
+    // Custom keymap with high precedence for Enter key
+    const customKeymap = keymap.of([{ key: 'Enter', run: insertNewlineAndIndent, preventDefault: true }]);
+
     const extensions: Extension[] = [
+      customKeymap,
       basicSetup,
       keymap.of([indentWithTab]),
       indentUnit.of('  '),
+      indentOnInput(),
       expressionLanguageSupport(this.analyzer), // Expression language with syntax highlighting
       syntaxHighlighting(darkHighlightStyle), // Dark theme optimized highlighting
       expressionLinter(this.analyzer), // Error highlighting with underlines
