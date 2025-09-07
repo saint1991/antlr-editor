@@ -1,8 +1,8 @@
-import { delimitedIndent, getIndentUnit, indentNodeProp, indentService, LanguageSupport, LRLanguage } from '@codemirror/language';
-import { NodeProp } from '@lezer/common';
+import { autocompletion } from '@codemirror/autocomplete';
+import { delimitedIndent, foldNodeProp, getIndentUnit, indentNodeProp, indentService, LanguageSupport, LRLanguage } from '@codemirror/language';
 import { styleTags, tags } from '@lezer/highlight';
 import type { Analyzer } from '../../../../wasm/analyzer';
-import { ExpressionParser, nodeSet } from './parser';
+import { ExpressionParser } from './parser';
 
 // Create the expression language with proper syntax highlighting
 export const expressionLanguageSupport = (analyzer: Analyzer): LanguageSupport => {
@@ -26,6 +26,11 @@ export const expressionLanguageSupport = (analyzer: Analyzer): LanguageSupport =
       indentNodeProp.add({
         FunctionCall: delimitedIndent({ closing: ')', align: false }),
         FunctionCallExpr: delimitedIndent({ closing: ')', align: false }),
+      }),
+      // Add folding for function calls
+      foldNodeProp.add({
+        FunctionCall: (node) => ({ from: node.from, to: node.to }),
+        FunctionCallExpr: (node) => ({ from: node.from, to: node.to }),
       }),
     ],
   });

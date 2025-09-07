@@ -9,9 +9,13 @@ import { basicSetup, EditorView } from 'codemirror';
 import { type Analyzer, loadAnalyzer } from '../../wasm/analyzer';
 import { expressionAutocompletion } from './extensions/completion/autocomplete';
 import { formatExpression, formatKeymap } from './extensions/format/formatter';
+import type { FunctionDescription } from './extensions/function';
+import { applyLintStyles } from './extensions/lint/lint-styles';
 import { expressionLinter } from './extensions/lint/linter';
 import { expressionLanguageSupport } from './extensions/syntax-highlight/language';
 import { darkHighlightStyle } from './extensions/syntax-highlight/theme/dark';
+import { expressionHoverTooltip } from './extensions/tooltip/tooltip';
+import { functionDescriptions } from './function-descriptions';
 
 @Component({
   selector: 'antlr-editor',
@@ -24,6 +28,7 @@ export class AntlrEditorComponent implements OnInit, AfterViewInit {
   @ViewChild('editor', { static: true }) editorElement!: ElementRef<HTMLDivElement>;
   @Input() initialValue: string = '';
   @Input() theme: 'light' | 'dark' = 'dark';
+  @Input() functionDescriptions: Record<string, FunctionDescription> = functionDescriptions;
   @Output() valueChange = new EventEmitter<string>();
 
   private editorView!: EditorView;
@@ -39,6 +44,9 @@ export class AntlrEditorComponent implements OnInit, AfterViewInit {
     // Load the WASM analyzer
     this.analyzer = await loadAnalyzer();
 
+    // Apply lint tooltip styles
+    applyLintStyles();
+
     // Custom keymap with high precedence for Enter key
     const customKeymap = keymap.of([{ key: 'Enter', run: insertNewlineAndIndent, preventDefault: true }]);
 
@@ -51,7 +59,8 @@ export class AntlrEditorComponent implements OnInit, AfterViewInit {
       expressionLanguageSupport(this.analyzer), // Expression language with syntax highlighting
       syntaxHighlighting(darkHighlightStyle), // Dark theme optimized highlighting
       expressionLinter(this.analyzer), // Error highlighting with underlines
-      expressionAutocompletion(), // Function name autocompletion
+      expressionAutocompletion(this.functionDescriptions), // Function name autocompletion
+      expressionHoverTooltip(this.functionDescriptions), // Function description tooltips
       bracketMatching(),
       lineNumbers(),
       foldGutter(),
