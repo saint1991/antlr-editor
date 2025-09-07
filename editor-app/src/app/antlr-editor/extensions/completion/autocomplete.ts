@@ -114,7 +114,7 @@ const applyAutocompleteStyles = () => {
       margin: 2px !important;
       border-radius: 6px !important;
       display: flex !important;
-      align-items: center !important;
+      align-items: flex-start !important;
       color: #e2e8f0 !important;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
       font-size: 13px !important;
@@ -123,6 +123,7 @@ const applyAutocompleteStyles = () => {
       transition: all 0.15s ease !important;
       background: transparent !important;
       border: 1px solid transparent !important;
+      min-height: 44px !important;
     }
 
     .cm-completion:hover,
@@ -140,15 +141,42 @@ const applyAutocompleteStyles = () => {
     }
 
     .cm-completionDetail {
-      margin-left: 8px !important;
-      opacity: 0.8 !important;
-      font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace !important;
+      display: none !important;
+    }
+    
+    /* Custom two-line completion styles */
+    .cm-completion-custom-container {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 2px !important;
+      flex: 1 !important;
+    }
+    
+    .cm-completion-label-line {
+      font-weight: 500 !important;
+      font-size: 13px !important;
+      color: #e2e8f0 !important;
+      line-height: 1.3 !important;
+    }
+    
+    .cm-completion-desc-line {
       font-size: 11px !important;
-      color: #68d391 !important;
-      background: rgba(104, 211, 145, 0.1) !important;
-      padding: 2px 6px !important;
-      border-radius: 3px !important;
-      border: 1px solid rgba(104, 211, 145, 0.3) !important;
+      opacity: 0.7 !important;
+      color: #cbd5e0 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      max-width: 300px !important;
+      line-height: 1.3 !important;
+    }
+    
+    .cm-completion[aria-selected] .cm-completion-label-line {
+      color: #ffffff !important;
+    }
+    
+    .cm-completion[aria-selected] .cm-completion-desc-line {
+      color: #e2e8f0 !important;
+      opacity: 0.8 !important;
     }
 
     .cm-tooltip.cm-completionInfo {
@@ -203,5 +231,45 @@ export const expressionAutocompletion = (functionDescriptions: Record<string, Fu
     icons: true,
     optionClass: (completion) => `cm-completion-${completion.type}`,
     tooltipClass: () => 'cm-autocomplete-tooltip',
+    addToOptions: [
+      {
+        render: (completion) => {
+          // Create a custom two-line structure for completion items
+          const container = document.createElement('div');
+          container.className = 'cm-completion-custom-container';
+          container.style.display = 'flex';
+          container.style.flexDirection = 'column';
+          container.style.gap = '2px';
+
+          // First line: function name (label)
+          const labelLine = document.createElement('div');
+          labelLine.className = 'cm-completion-label-line';
+          labelLine.textContent = completion.label;
+          labelLine.style.fontWeight = '500';
+          labelLine.style.fontSize = '13px';
+          labelLine.style.color = '#e2e8f0';
+
+          // Second line: description (detail or info)
+          const descLine = document.createElement('div');
+          descLine.className = 'cm-completion-desc-line';
+          descLine.textContent = completion.detail || (typeof completion.info === 'string' ? completion.info : '') || '';
+          descLine.style.fontSize = '11px';
+          descLine.style.opacity = '0.7';
+          descLine.style.color = '#cbd5e0';
+          descLine.style.whiteSpace = 'nowrap';
+          descLine.style.overflow = 'hidden';
+          descLine.style.textOverflow = 'ellipsis';
+          descLine.style.maxWidth = '300px';
+
+          container.appendChild(labelLine);
+          if (descLine.textContent) {
+            container.appendChild(descLine);
+          }
+
+          return container;
+        },
+        position: 50,
+      },
+    ],
   });
 };
